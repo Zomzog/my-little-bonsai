@@ -1,12 +1,13 @@
 package fr.zomzog.mylittlebonsai
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class AppTest {
 
     @Test
     fun appModuleCompiles() {
-        assertTrue(true)
+        assertThat(1 + 1).isEqualTo(2)
     }
 }
