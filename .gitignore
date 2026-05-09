@@ -1,0 +1,42 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+local.properties
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+/captures/
+.externalNativeBuild/
+.cxx/
+*.keystore
+!debug.keystore
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Kotlin
+*.class
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# wasmJs / webpack cache
+node_modules/
+.kotlin/
+kotlin-js-store/
+
+# Generated
+composeApp/src/*/generatedResources/
+
+# Secrets
+*.env
+*.env.*

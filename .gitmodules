@@ -1,0 +1,3 @@
+[submodule ".agents/compose-skill"]
+	path = .agents/compose-skill
+	url = https://github.com/Meet-Miyani/compose-skill
