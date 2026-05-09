@@ -4,10 +4,14 @@ compose-multiplatform = "1.10.3"
 agp = "9.2.0"
 androidx-activity-compose = "1.13.0"
 kotlin-test = "2.3.21"
+assertk = "0.28.1"
+mockk = "1.13.12"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-test" }
+assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
