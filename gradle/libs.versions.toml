@@ -5,7 +5,7 @@ agp = "9.2.0"
 androidx-activity-compose = "1.13.0"
 kotlin-test = "2.3.21"
 assertk = "0.28.1"
-mockk = "1.13.12"
+mockk = "1.14.9"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
