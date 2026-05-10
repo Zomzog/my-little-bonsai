@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
@@ -12,12 +10,6 @@ kotlin {
         namespace = "fr.zomzog.mylittlebonsai"
         compileSdk = 36
         minSdk = 29
-
-        compilations.all {
-            compileKotlinTask.compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_25)
-            }
-        }
     }
 
     @Suppress("OPT_IN_USAGE")
