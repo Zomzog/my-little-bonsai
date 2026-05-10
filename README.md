@@ -1,5 +1,9 @@
 # My Little Bonsai
 
+[![CI](https://github.com/zomzog/my-little-bonsai/actions/workflows/ci.yml/badge.svg)](https://github.com/zomzog/my-little-bonsai/actions/workflows/ci.yml)
+[![Deploy Web](https://github.com/zomzog/my-little-bonsai/actions/workflows/deploy-web.yml/badge.svg)](https://github.com/zomzog/my-little-bonsai/actions/workflows/deploy-web.yml)
+[![GitHub release](https://img.shields.io/github/v/release/zomzog/my-little-bonsai?include_prereleases)](https://github.com/zomzog/my-little-bonsai/releases)
+
 A Kotlin Multiplatform Compose application targeting **Android** and **WebAssembly (wasmJs)**.
 
 ## Tech Stack
