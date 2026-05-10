@@ -14,7 +14,6 @@ assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assert
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-kotlin-multiplatform-application = { id = "com.android.kotlin.multiplatform.application", version.ref = "agp" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
