@@ -13,8 +13,10 @@ kotlin {
         compileSdk = 36
         minSdk = 29
 
-        compilerOptions.configure {
-            jvmTarget.set(JvmTarget.JVM_25)
+        compilations.all {
+            compileKotlinTask.compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_25)
+            }
         }
     }
 
