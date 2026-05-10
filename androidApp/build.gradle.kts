@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "fr.zomzog.mylittlebonsai"
+    namespace = "fr.zomzog.mylittlebonsai.app"
     compileSdk = 36
 
     defaultConfig {
