@@ -27,29 +27,14 @@ jobs:
           cache: gradle
 
       - name: Run common tests
-        id: tests
-        run: |
-          set -o pipefail
-          ./gradlew :composeApp:allTests --continue --stacktrace --info 2>&1 | tee gradle-tests.log
-
-      - name: Surface gradle failure to summary
-        if: failure() && steps.tests.outcome == 'failure'
-        run: |
-          {
-            echo '## Tests failed — last 300 lines of gradle output'
-            echo '```'
-            tail -n 300 gradle-tests.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+        run: ./gradlew :composeApp:allTests --continue --stacktrace
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: |
-            composeApp/build/reports/tests/
-            gradle-tests.log
+          path: composeApp/build/reports/tests/
 
   build-android:
     name: Build Android APK
@@ -67,34 +52,13 @@ jobs:
           cache: gradle
 
       - name: Build Android debug APK
-        id: build
-        run: |
-          set -o pipefail
-          ./gradlew :androidApp:assembleDebug --stacktrace --info 2>&1 | tee gradle-android.log
-
-      - name: Surface gradle failure to summary
-        if: failure() && steps.build.outcome == 'failure'
-        run: |
-          {
-            echo '## Android build failed — last 300 lines of gradle output'
-            echo '```'
-            tail -n 300 gradle-android.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+        run: ./gradlew :androidApp:assembleDebug --stacktrace
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: android-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
-
-      - name: Upload build log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-build-log
-          path: gradle-android.log
 
   build-web:
     name: Build Web (wasmJs)
@@ -112,31 +76,10 @@ jobs:
           cache: gradle
 
       - name: Build wasmJs distribution
-        id: build
-        run: |
-          set -o pipefail
-          ./gradlew :composeApp:wasmJsBrowserDistribution --stacktrace --info 2>&1 | tee gradle-web.log
-
-      - name: Surface gradle failure to summary
-        if: failure() && steps.build.outcome == 'failure'
-        run: |
-          {
-            echo '## Web build failed — last 300 lines of gradle output'
-            echo '```'
-            tail -n 300 gradle-web.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+        run: ./gradlew :composeApp:wasmJsBrowserDistribution --stacktrace
 
       - name: Upload web dist
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: web-dist
           path: composeApp/build/dist/wasmJs/productionExecutable/
-
-      - name: Upload build log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build-log
-          path: gradle-web.log

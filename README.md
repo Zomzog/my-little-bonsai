@@ -11,11 +11,18 @@ A Kotlin Multiplatform Compose application targeting **Android** and **WebAssemb
 | Layer | Technology |
 |---|---|
 | Language | Kotlin 2.3.21 |
-| UI | Compose Multiplatform 1.10.3 |
+| UI | Compose Multiplatform 1.11.0 |
 | Platforms | Android (minSdk 29) · Web (wasmJs) |
-| Build | Gradle 9.5 |
+| Build | Gradle 9.5.1 · AGP 9.2.0 |
 | JDK | 25 (Temurin) |
 | Tests | kotlin.test · [assertk](https://github.com/willowtreeapps/assertk) · [mockk](https://mockk.io) (Android unit tests) |
+
+## Modules
+
+| Module | Plugins | Purpose |
+|---|---|---|
+| `:composeApp` | `kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` + Compose | Shared `App()` composable, `MainActivity`, wasmJs entry point |
+| `:androidApp` | `com.android.application` | Thin Android application wrapping `:composeApp` (manifest, theme, launcher) |
 
 ## Prerequisites
 
@@ -36,8 +43,8 @@ cp local.properties.example local.properties
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
 
 # Build the Android debug APK
-./gradlew :composeApp:assembleDebug
-# Output: composeApp/build/outputs/apk/debug/
+./gradlew :androidApp:assembleDebug
+# Output: androidApp/build/outputs/apk/debug/
 
 # Build the production web distribution
 ./gradlew :composeApp:wasmJsBrowserDistribution
