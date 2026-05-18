@@ -1,20 +1,9 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-}
-
-kotlin {
-    jvmToolchain(25)
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_25)
-    }
 }
 
 android {
-    namespace = "fr.zomzog.mylittlebonsai.android"
+    namespace = "fr.zomzog.mylittlebonsai.app"
     compileSdk = 36
 
     defaultConfig {
@@ -25,9 +14,10 @@ android {
         versionName = "1.0.0"
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 
     buildTypes {
@@ -36,10 +26,9 @@ android {
         }
     }
 
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

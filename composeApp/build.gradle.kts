@@ -1,25 +1,20 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kover)
 }
 
 kotlin {
-    jvmToolchain(25)
-
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_25)
-        }
+    android {
+        namespace = "fr.zomzog.mylittlebonsai"
+        compileSdk = 36
+        minSdk = 29
     }
 
     jvm()
@@ -27,11 +22,7 @@ kotlin {
     @Suppress("OPT_IN_USAGE")
     wasmJs {
         outputModuleName = "composeApp"
-        browser {
-            commonWebpackConfig {
-                outputFileName = "composeApp.js"
-            }
-        }
+        browser()
         binaries.executable()
     }
 
@@ -53,8 +44,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.activity.compose)
-            implementation(compose.preview)
+            api(libs.androidx.activity.compose)
         }
 
         val jvmTest by getting {
@@ -62,27 +52,7 @@ kotlin {
                 implementation(compose.desktop.currentOs)
             }
         }
-
-        androidUnitTest.dependencies {
-            implementation(libs.mockk)
-        }
     }
-}
-
-android {
-    namespace = "fr.zomzog.mylittlebonsai"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 29
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
-    }
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 }
 
 kover {
