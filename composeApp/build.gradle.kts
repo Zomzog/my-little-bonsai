@@ -30,6 +30,9 @@ kotlin {
         compileSdk = 36
         minSdk = 29
 
+        androidResources {
+            enable = true
+        }
         compilerOptions {
             jvmTarget = JvmTarget.JVM_17
         }
@@ -50,7 +53,7 @@ kotlin {
             implementation(libs.compose.ui.test)
         }
 
-        val jvmTest by getting {
+        val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
             }
