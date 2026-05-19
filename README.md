@@ -7,7 +7,7 @@ The bonsai life tracker — a Kotlin Compose Multiplatform app for Android and W
 
 ## Stack
 
-- Kotlin 2.3.21, Compose Multiplatform 1.11.0, AGP 9.2.0
+- Kotlin 2.3.20, Compose Multiplatform 1.10.1, AGP 9.2.1
 - JDK 25 (toolchain & bytecode target)
 - Targets: Android (`androidApp`) + Web/wasmJs (`composeApp`)
 - Tests: Compose UI test + assertk; mockk on JVM where useful
