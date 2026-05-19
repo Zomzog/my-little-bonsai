@@ -78,7 +78,7 @@ kover {
             rule {
                 bound {
                     minValue = 100
-                    coverageUnits = CoverageUnit.INSTRUCTION
+                    coverageUnits = CoverageUnit.LINE
                     aggregationForGroup = AggregationType.COVERED_PERCENTAGE
                 }
             }
