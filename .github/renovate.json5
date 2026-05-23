@@ -15,6 +15,10 @@
   automerge: true,
   platformAutomerge: true,
 
+  // Rebase automatically whenever the base branch advances, satisfying the
+  // "branch must be up to date" branch-protection rule
+  rebaseWhen: "behind-base-branch",
+
   packageRules: [
     {
       // Mirror Dependabot's "direct:production" label — tag direct Gradle
