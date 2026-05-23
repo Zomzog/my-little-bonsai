@@ -56,6 +56,12 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.androidx.activity.compose)
+            }
+        }
+
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
