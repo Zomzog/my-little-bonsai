@@ -45,12 +45,15 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             implementation(libs.components.resources)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.coroutines.core)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.assertk)
             implementation(libs.compose.ui.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         val jvmMain by getting {

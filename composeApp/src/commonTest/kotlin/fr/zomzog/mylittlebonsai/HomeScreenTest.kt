@@ -5,8 +5,10 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class HomeScreenTest {
@@ -42,5 +44,13 @@ class HomeScreenTest {
 
         onAllNodesWithText(APP_TITLE).assertCountEquals(1)
         onAllNodesWithText(APP_TAGLINE).assertCountEquals(1)
+    }
+
+    @Test
+    fun homeScreenCallsOnNavigateWhenClicked() = runComposeUiTest {
+        var navigated = false
+        setContent { HomeScreen(onNavigate = { navigated = true }) }
+        onNodeWithText(APP_TITLE).performClick()
+        assertTrue(navigated)
     }
 }
