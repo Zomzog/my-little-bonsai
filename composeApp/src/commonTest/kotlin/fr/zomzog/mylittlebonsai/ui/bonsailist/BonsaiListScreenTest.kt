@@ -1,7 +1,8 @@
 package fr.zomzog.mylittlebonsai.ui.bonsailist
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -28,7 +29,7 @@ class BonsaiListScreenTest {
         setContent {
             BonsaiListScreen(repository = InMemoryBonsaiRepository(), onNavigateToAdd = {})
         }
-        onNodeWithText("Akira").assertDoesNotExist()
+        onAllNodesWithText("Akira").assertCountEquals(0)
     }
 
     @Test
@@ -62,7 +63,7 @@ class BonsaiListScreenTest {
         )
         setContent { BonsaiListScreen(repository = repo, onNavigateToAdd = {}) }
         onNodeWithText("Akira").assertExists()
-        onNodeWithText(EMPTY_LIST_MESSAGE).assertDoesNotExist()
+        onAllNodesWithText(EMPTY_LIST_MESSAGE).assertCountEquals(0)
     }
 
     @Test
