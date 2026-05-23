@@ -8,17 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,13 +27,7 @@ import androidx.compose.ui.unit.dp
 import fr.zomzog.mylittlebonsai.domain.Bonsai
 import fr.zomzog.mylittlebonsai.domain.BonsaiRepository
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
-import kotlinx.datetime.plus
-import kotlinx.datetime.todayIn
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -50,15 +40,6 @@ const val BUTTON_ADD = "Add"
 const val ERROR_NAME_BLANK = "Name is required"
 const val ERROR_KIND_BLANK = "Kind is required"
 const val ERROR_PURCHASE_DATE_REQUIRED = "Purchase date is required"
-
-// Material3 DatePickerState stores dates as UTC-midnight epoch milliseconds.
-// Since it is always midnight UTC, dividing by the number of ms in a day gives
-// an exact integer — no timezone conversion required.
-private fun LocalDate.toPickerMillis(): Long =
-    LocalDate(1970, 1, 1).daysUntil(this).toLong() * 86_400_000L
-
-private fun Long.toLocalDate(): LocalDate =
-    LocalDate(1970, 1, 1).plus((this / 86_400_000L).toInt(), DateTimeUnit.DAY)
 
 data class AddBonsaiFormState(
     val name: String = "",
@@ -112,8 +93,6 @@ fun AddBonsaiScreen(
     val coroutineScope = rememberCoroutineScope()
     var showPurchaseDatePicker by remember { mutableStateOf(false) }
     var showMaintenanceDatePicker by remember { mutableStateOf(false) }
-
-    val todayMillis = Clock.System.todayIn(TimeZone.currentSystemDefault()).toPickerMillis()
 
     Scaffold(
         topBar = {
@@ -193,49 +172,24 @@ fun AddBonsaiScreen(
     }
 
     if (showPurchaseDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = formState.purchaseDate?.toPickerMillis() ?: todayMillis,
+        BonsaiDatePickerDialog(
+            initialDate = formState.purchaseDate,
+            onDateSelected = { date ->
+                formState = formState.copy(purchaseDate = date, purchaseDateError = null)
+                showPurchaseDatePicker = false
+            },
+            onDismiss = { showPurchaseDatePicker = false },
         )
-        DatePickerDialog(
-            onDismissRequest = { showPurchaseDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        formState = formState.copy(
-                            purchaseDate = millis.toLocalDate(),
-                            purchaseDateError = null,
-                        )
-                    }
-                    showPurchaseDatePicker = false
-                }) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPurchaseDatePicker = false }) { Text("Cancel") }
-            },
-        ) {
-            DatePicker(state = datePickerState)
-        }
     }
 
     if (showMaintenanceDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = formState.lastMaintenanceDate?.toPickerMillis() ?: todayMillis,
+        BonsaiDatePickerDialog(
+            initialDate = formState.lastMaintenanceDate,
+            onDateSelected = { date ->
+                formState = formState.copy(lastMaintenanceDate = date)
+                showMaintenanceDatePicker = false
+            },
+            onDismiss = { showMaintenanceDatePicker = false },
         )
-        DatePickerDialog(
-            onDismissRequest = { showMaintenanceDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        formState = formState.copy(lastMaintenanceDate = millis.toLocalDate())
-                    }
-                    showMaintenanceDatePicker = false
-                }) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showMaintenanceDatePicker = false }) { Text("Cancel") }
-            },
-        ) {
-            DatePicker(state = datePickerState)
-        }
     }
 }
