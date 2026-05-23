@@ -112,3 +112,10 @@ Any breaking changes or steps required for existing data / users.
 - Keep `androidMain` and `wasmJsMain` as thin as possible.
 - No comments unless the *why* is non-obvious.
 - UI composables are stateless; state lives in ViewModels or state hoisting.
+
+## Test Coverage
+
+- **Target 100% line coverage** for all production code, even though Kover is configured with a 95% minimum.
+- Every new class, function, or branch must have a corresponding test.
+- Platform-specific implementations (`jvmMain`, `androidMain`, `wasmJsMain`) need tests in their respective test source sets (`jvmTest`, etc.) when `commonTest` cannot reach them.
+- Do not ship code that cannot be tested; if a path is untestable, remove it or replace it with a testable abstraction.
