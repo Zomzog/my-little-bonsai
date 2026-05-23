@@ -15,10 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 
 @Composable
 actual fun BonsaiDatePickerDialog(
@@ -26,7 +23,7 @@ actual fun BonsaiDatePickerDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val init = initialDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val init = initialDate ?: LocalDate(2024, 1, 1)
     var year by remember { mutableStateOf(init.year.toString()) }
     var month by remember { mutableStateOf(init.monthNumber.toString()) }
     var day by remember { mutableStateOf(init.dayOfMonth.toString()) }
