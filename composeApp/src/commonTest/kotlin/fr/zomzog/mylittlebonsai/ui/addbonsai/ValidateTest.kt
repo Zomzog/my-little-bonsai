@@ -12,13 +12,13 @@ class ValidateTest {
     private fun state(
         name: String = "Akira",
         kind: String = "Maple",
-        purchaseDate: String = "2024-03-10",
-        lastMaintenance: String = "",
+        purchaseDate: LocalDate? = LocalDate(2024, 3, 10),
+        lastMaintenance: LocalDate? = null,
     ) = AddBonsaiFormState(
         name = name,
         kind = kind,
-        purchaseDateText = purchaseDate,
-        lastMaintenanceDateText = lastMaintenance,
+        purchaseDate = purchaseDate,
+        lastMaintenanceDate = lastMaintenance,
     )
 
     @Test
@@ -33,7 +33,7 @@ class ValidateTest {
 
     @Test
     fun validFormWithMaintenanceDateReturnsBonsai() {
-        val result = validate(state(lastMaintenance = "2025-01-20"))
+        val result = validate(state(lastMaintenance = LocalDate(2025, 1, 20)))
         assertThat(result.bonsai).isNotNull()
         assertThat(result.bonsai!!.lastMaintenanceDate).isEqualTo(LocalDate(2025, 1, 20))
     }
@@ -60,35 +60,21 @@ class ValidateTest {
     }
 
     @Test
-    fun invalidPurchaseDateSetsDateError() {
-        val result = validate(state(purchaseDate = "not-a-date"))
+    fun nullPurchaseDateSetsDateError() {
+        val result = validate(state(purchaseDate = null))
         assertThat(result.bonsai).isNull()
-        assertThat(result.updatedState.purchaseDateError).isEqualTo(ERROR_DATE_FORMAT)
+        assertThat(result.updatedState.purchaseDateError).isEqualTo(ERROR_PURCHASE_DATE_REQUIRED)
     }
 
     @Test
-    fun emptyPurchaseDateSetsDateError() {
-        val result = validate(state(purchaseDate = ""))
-        assertThat(result.bonsai).isNull()
-        assertThat(result.updatedState.purchaseDateError).isEqualTo(ERROR_DATE_FORMAT)
-    }
-
-    @Test
-    fun invalidMaintenanceDateSetsMaintenanceDateError() {
-        val result = validate(state(lastMaintenance = "bad-date"))
-        assertThat(result.bonsai).isNull()
-        assertThat(result.updatedState.lastMaintenanceDateError).isEqualTo(ERROR_DATE_FORMAT)
-    }
-
-    @Test
-    fun blankMaintenanceDateIsAccepted() {
-        val result = validate(state(lastMaintenance = ""))
-        assertThat(result.updatedState.lastMaintenanceDateError).isNull()
+    fun nullMaintenanceDateIsAccepted() {
+        val result = validate(state(lastMaintenance = null))
+        assertThat(result.bonsai).isNotNull()
     }
 
     @Test
     fun multipleErrorsAreAllReported() {
-        val result = validate(state(name = "", kind = "", purchaseDate = "bad"))
+        val result = validate(state(name = "", kind = "", purchaseDate = null))
         assertThat(result.bonsai).isNull()
         assertThat(result.updatedState.nameError).isNotNull()
         assertThat(result.updatedState.kindError).isNotNull()
@@ -100,7 +86,7 @@ class ValidateTest {
         val dirtyState = AddBonsaiFormState(
             name = "Akira",
             kind = "Maple",
-            purchaseDateText = "2024-03-10",
+            purchaseDate = LocalDate(2024, 3, 10),
             nameError = "stale error",
             kindError = "stale error",
         )
