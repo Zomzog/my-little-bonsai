@@ -33,7 +33,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: composeApp/build/reports/tests/
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload Kover XML
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: kover-report
           path: composeApp/build/reports/kover/
@@ -86,7 +86,7 @@ jobs:
         run: ./gradlew :androidApp:assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
@@ -112,7 +112,7 @@ jobs:
         run: ./gradlew :composeApp:wasmJsBrowserDistribution
 
       - name: Upload web dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-dist
           path: composeApp/build/dist/wasmJs/productionExecutable/
