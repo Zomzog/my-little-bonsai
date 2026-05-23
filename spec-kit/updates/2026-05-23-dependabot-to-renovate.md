@@ -20,7 +20,7 @@ labelling and approval behaviour.
   (labelling, approval, auto-merge).
 
 ### Added
-- `renovate.json` — Renovate configuration at repository root.
+- `.github/renovate.json5` — Renovate configuration (JSON5 format, under `.github/`).
   - Weekly schedule (Monday before 06:00).
   - `dependencies` label on every Renovate PR.
   - `production` label on direct Gradle production configurations
