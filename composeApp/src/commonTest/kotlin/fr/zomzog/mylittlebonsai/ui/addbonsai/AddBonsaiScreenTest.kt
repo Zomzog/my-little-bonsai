@@ -38,13 +38,12 @@ class AddBonsaiScreenTest {
     }
 
     @Test
-    fun clickingAddWithInvalidDateShowsDateError() = runComposeUiTest {
+    fun clickingAddWithoutPurchaseDateShowsDateError() = runComposeUiTest {
         setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performTextInput("not-a-date")
         onNodeWithText(BUTTON_ADD).performClick()
-        onNodeWithText(ERROR_DATE_FORMAT).assertExists()
+        onNodeWithText(ERROR_PURCHASE_DATE_REQUIRED).assertExists()
     }
 
     @Test
@@ -58,21 +57,55 @@ class AddBonsaiScreenTest {
         }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performTextInput("2024-03-10")
+        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText("Year").performTextInput("2024")
+        onNodeWithText("Month").performTextInput("3")
+        onNodeWithText("Day").performTextInput("10")
+        onNodeWithText("OK").performClick()
         onNodeWithText(BUTTON_ADD).performClick()
         waitForIdle()
         assertTrue(added)
     }
 
     @Test
-    fun invalidMaintenanceDateShowsError() = runComposeUiTest {
+    fun invalidDateInPickerShowsError() = runComposeUiTest {
+        setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
+        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText("OK").performClick()
+        onNodeWithText(ERROR_INVALID_DATE).assertExists()
+    }
+
+    @Test
+    fun typingAfterInvalidDateClearsError() = runComposeUiTest {
+        setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
+        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText("OK").performClick()
+        onNodeWithText(ERROR_INVALID_DATE).assertExists()
+        onNodeWithText("Year").performTextInput("2024")
+        onNodeWithText(ERROR_INVALID_DATE).assertDoesNotExist()
+    }
+
+    @Test
+    fun cancellingDatePickerKeepsNoPurchaseDate() = runComposeUiTest {
+        setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
+        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText("Cancel").performClick()
+        onNodeWithText(LABEL_PURCHASE_DATE).assertExists()
+    }
+
+    @Test
+    fun purchaseDateErrorClearsAfterPickingDate() = runComposeUiTest {
         setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performTextInput("2024-03-10")
-        onNodeWithText(LABEL_LAST_MAINTENANCE).performTextInput("bad-date")
         onNodeWithText(BUTTON_ADD).performClick()
-        onNodeWithText(ERROR_DATE_FORMAT).assertExists()
+        onNodeWithText(ERROR_PURCHASE_DATE_REQUIRED).assertExists()
+        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText("Year").performTextInput("2024")
+        onNodeWithText("Month").performTextInput("3")
+        onNodeWithText("Day").performTextInput("10")
+        onNodeWithText("OK").performClick()
+        onNodeWithText(ERROR_PURCHASE_DATE_REQUIRED).assertDoesNotExist()
     }
 
     @Test
@@ -86,8 +119,16 @@ class AddBonsaiScreenTest {
         }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performTextInput("2024-03-10")
-        onNodeWithText(LABEL_LAST_MAINTENANCE).performTextInput("2025-01-20")
+        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText("Year").performTextInput("2024")
+        onNodeWithText("Month").performTextInput("3")
+        onNodeWithText("Day").performTextInput("10")
+        onNodeWithText("OK").performClick()
+        onNodeWithText(LABEL_LAST_MAINTENANCE).performClick()
+        onNodeWithText("Year").performTextInput("2025")
+        onNodeWithText("Month").performTextInput("1")
+        onNodeWithText("Day").performTextInput("20")
+        onNodeWithText("OK").performClick()
         onNodeWithText(BUTTON_ADD).performClick()
         waitForIdle()
         assertTrue(added)
