@@ -71,6 +71,15 @@ kotlin {
 }
 
 kover {
+    // androidMain uses Android SAF/Compose APIs that require on-device testing and
+    // cannot be reached by the JVM Kover task; exclude it so the report is
+    // consistent with wasmJsMain (which is also not instrumented by JVM Kover).
+    currentProject {
+        sources {
+            excludedSourceSets.add("androidMain")
+        }
+    }
+
     reports {
         filters {
             excludes {
