@@ -2,15 +2,11 @@
 
 package fr.zomzog.mylittlebonsai.ui.addbonsai
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +14,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import fr.zomzog.mylittlebonsai.domain.Bonsai
 import fr.zomzog.mylittlebonsai.domain.BonsaiRepository
@@ -46,7 +40,6 @@ const val BUTTON_ADD = "Add"
 const val ERROR_NAME_BLANK = "Name is required"
 const val ERROR_KIND_BLANK = "Kind is required"
 const val ERROR_PURCHASE_DATE_REQUIRED = "Purchase date is required"
-const val ERROR_INVALID_DATE = "Invalid date"
 
 data class AddBonsaiFormState(
     val name: String = "",
@@ -199,73 +192,4 @@ fun AddBonsaiScreen(
             onDismiss = { showMaintenanceDatePicker = false },
         )
     }
-}
-
-@Composable
-private fun BonsaiDatePickerDialog(
-    initialDate: LocalDate?,
-    onDateSelected: (LocalDate) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var year by remember { mutableStateOf(initialDate?.year?.toString() ?: "") }
-    var month by remember { mutableStateOf(initialDate?.monthNumber?.toString() ?: "") }
-    var day by remember { mutableStateOf(initialDate?.dayOfMonth?.toString() ?: "") }
-    var dateError by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Select Date") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (dateError) {
-                    Text(
-                        text = ERROR_INVALID_DATE,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = year,
-                        onValueChange = { year = it; dateError = false },
-                        label = { Text("Year") },
-                        modifier = Modifier.weight(2f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                    )
-                    OutlinedTextField(
-                        value = month,
-                        onValueChange = { month = it; dateError = false },
-                        label = { Text("Month") },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                    )
-                    OutlinedTextField(
-                        value = day,
-                        onValueChange = { day = it; dateError = false },
-                        label = { Text("Day") },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                val date = runCatching {
-                    LocalDate(year.toInt(), month.toInt(), day.toInt())
-                }.getOrNull()
-                if (date != null) {
-                    onDateSelected(date)
-                } else {
-                    dateError = true
-                }
-            }) { Text("OK") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        },
-    )
 }
