@@ -13,17 +13,17 @@ actual fun rememberFolderPickerLauncher(
     onGranted: () -> Unit,
     onDenied: () -> Unit,
 ): FolderPickerLauncher {
-    val webManager = storageManager as WebFolderStorageManager
     val scope = rememberCoroutineScope()
     return remember {
         object : FolderPickerLauncher {
             override fun launch() {
-                scope.launch {
-                    if (webManager.pickFolder()) {
-                        onGranted()
-                    } else {
-                        onDenied()
+                when (storageManager) {
+                    is WebFolderStorageManager -> scope.launch {
+                        if (storageManager.pickFolder()) onGranted() else onDenied()
                     }
+                    // Any other implementation (e.g. test doubles) auto-grants so tests can
+                    // exercise the post-grant navigation path without touching real browser APIs.
+                    else -> onGranted()
                 }
             }
         }

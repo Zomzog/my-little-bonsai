@@ -14,12 +14,17 @@ actual fun rememberFolderPickerLauncher(
     onGranted: () -> Unit,
     onDenied: () -> Unit,
 ): FolderPickerLauncher {
-    val androidManager = storageManager as AndroidFolderStorageManager
+    // Only wire up the real SAF picker when running with the real Android manager.
+    // Any other implementation (e.g. test doubles in Android instrumented tests) auto-grants.
+    if (storageManager !is AndroidFolderStorageManager) {
+        return remember { object : FolderPickerLauncher { override fun launch() = onGranted() } }
+    }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree(),
     ) { uri ->
         if (uri != null) {
-            androidManager.persistFolder(uri)
+            storageManager.persistFolder(uri)
             onGranted()
         } else {
             onDenied()
