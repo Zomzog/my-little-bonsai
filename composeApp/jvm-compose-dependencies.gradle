@@ -1,0 +1,13 @@
+// Groovy DSL is used intentionally: compose.desktop.currentOs is provided by the
+// composeMultiplatform plugin extension, which is only applied when ANDROID_HOME /
+// ANDROID_SDK_ROOT is set. Accessing it from a conditionally-applied Groovy script
+// avoids Kotlin DSL compile-time "unresolved reference: compose" errors.
+kotlin {
+    sourceSets {
+        jvmMain {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+            }
+        }
+    }
+}

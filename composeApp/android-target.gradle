@@ -1,0 +1,19 @@
+// Groovy DSL is used intentionally: the android {} block inside kotlin {} is provided
+// by com.android.kotlin.multiplatform.library and its types are not on the classpath
+// when the plugin is absent. Groovy's dynamic dispatch avoids compile-time type errors,
+// while this file is only applied when ANDROID_HOME / ANDROID_SDK_ROOT is set (i.e. the
+// plugin has already been applied in build.gradle.kts).
+kotlin {
+    android {
+        namespace = "fr.zomzog.mylittlebonsai"
+        compileSdk = 36
+        minSdk = 29
+
+        androidResources {
+            enable = true
+        }
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
+    }
+}
