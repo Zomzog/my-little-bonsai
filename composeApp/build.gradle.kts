@@ -87,6 +87,9 @@ kover {
                     "mylittlebonsai.composeapp.generated.resources.*",
                     "*ComposableSingletons*",
                     "*\$WhenMappings",
+                    // androidMain classes require on-device tests; excluded from JVM coverage
+                    "*AndroidFolderStorageManager*",
+                    "*.foldersetup.FolderPickerSupportKt\$rememberFolderPickerLauncher\$*",
                 )
                 annotatedBy("androidx.compose.ui.tooling.preview.Preview")
             }
