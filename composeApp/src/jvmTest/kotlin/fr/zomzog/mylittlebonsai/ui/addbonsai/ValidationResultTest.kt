@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isTrue
+import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 
 class ValidationResultTest {
@@ -11,27 +12,31 @@ class ValidationResultTest {
     private fun validState() = AddBonsaiFormState(
         name = "Akira",
         kind = "Maple",
-        purchaseDateText = "2024-03-10",
+        purchaseDate = LocalDate(2024, 3, 10),
     )
+
+    // validate() generates a random UUID for Bonsai.id, so equality tests use an
+    // invalid state (bonsai = null) where UUID randomness is not a factor.
+    private fun invalidState() = AddBonsaiFormState(name = "", kind = "Maple", purchaseDate = LocalDate(2024, 3, 10))
 
     @Test
     fun validationResultEqualityForSameInputs() {
-        val r1 = validate(validState())
-        val r2 = validate(validState())
+        val r1 = validate(invalidState())
+        val r2 = validate(invalidState())
         assertThat(r1).isEqualTo(r2)
     }
 
     @Test
     fun validationResultInequalityForDifferentInputs() {
-        val r1 = validate(validState())
-        val r2 = validate(validState().copy(name = "Bonsuke"))
+        val r1 = validate(invalidState())
+        val r2 = validate(invalidState().copy(kind = "Pine"))
         assertThat(r1).isNotEqualTo(r2)
     }
 
     @Test
     fun validationResultHashCodeConsistentWithEquals() {
-        val r1 = validate(validState())
-        val r2 = validate(validState())
+        val r1 = validate(invalidState())
+        val r2 = validate(invalidState())
         assertThat(r1.hashCode()).isEqualTo(r2.hashCode())
     }
 
