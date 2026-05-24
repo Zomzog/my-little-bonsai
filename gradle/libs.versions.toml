@@ -1,12 +1,14 @@
 [versions]
-kotlin = "2.3.20"
-compose = "1.10.1"
+kotlin = "2.3.21"
+compose = "1.11.0"
 compose-material3 = "1.10.0-alpha05"
 agp = "9.2.1"
 androidx-activity = "1.13.0"
 assertk = "0.28.1"
 mockk = "1.14.9"
 kover = "0.9.8"
+kotlinx-datetime = "0.8.0-0.6.x-compat"
+kotlinx-coroutines = "1.11.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -21,6 +23,9 @@ components-resources = { module = "org.jetbrains.compose.components:components-r
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
