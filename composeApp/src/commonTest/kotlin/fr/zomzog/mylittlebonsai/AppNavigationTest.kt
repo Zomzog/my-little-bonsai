@@ -14,6 +14,8 @@ import fr.zomzog.mylittlebonsai.ui.addbonsai.LABEL_NAME
 import fr.zomzog.mylittlebonsai.ui.addbonsai.LABEL_PURCHASE_DATE
 import fr.zomzog.mylittlebonsai.ui.bonsailist.ADD_BONSAI_BUTTON_DESCRIPTION
 import fr.zomzog.mylittlebonsai.ui.bonsailist.BONSAI_LIST_TITLE
+import fr.zomzog.mylittlebonsai.ui.foldersetup.FOLDER_SETUP_BUTTON
+import fr.zomzog.mylittlebonsai.ui.foldersetup.FOLDER_SETUP_TITLE
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class)
@@ -26,16 +28,40 @@ class AppNavigationTest {
     }
 
     @Test
-    fun clickingHomeScreenNavigatesToBonsaiList() = runComposeUiTest {
-        setContent { App(useDarkTheme = false) }
+    fun clickingHomeScreenNavigatesToBonsaiListWhenAccessGranted() = runComposeUiTest {
+        val manager = FakeFolderStorageManager(hasAccess = true)
+        setContent { App(useDarkTheme = false, folderStorageManager = manager) }
         onNodeWithText(APP_TITLE).performClick()
+        waitForIdle()
+        onNodeWithText(BONSAI_LIST_TITLE).assertExists()
+    }
+
+    @Test
+    fun clickingHomeScreenShowsFolderSetupWhenNoAccess() = runComposeUiTest {
+        val manager = FakeFolderStorageManager(hasAccess = false)
+        setContent { App(useDarkTheme = false, folderStorageManager = manager) }
+        onNodeWithText(APP_TITLE).performClick()
+        waitForIdle()
+        onNodeWithText(FOLDER_SETUP_TITLE).assertExists()
+    }
+
+    @Test
+    fun grantingFolderAccessNavigatesToBonsaiList() = runComposeUiTest {
+        val manager = FakeFolderStorageManager(hasAccess = false)
+        setContent { App(useDarkTheme = false, folderStorageManager = manager) }
+        onNodeWithText(APP_TITLE).performClick()
+        waitForIdle()
+        onNodeWithText(FOLDER_SETUP_BUTTON).performClick()
+        waitForIdle()
         onNodeWithText(BONSAI_LIST_TITLE).assertExists()
     }
 
     @Test
     fun clickingAddButtonNavigatesToAddBonsai() = runComposeUiTest {
-        setContent { App(useDarkTheme = false) }
+        val manager = FakeFolderStorageManager(hasAccess = true)
+        setContent { App(useDarkTheme = false, folderStorageManager = manager) }
         onNodeWithText(APP_TITLE).performClick()
+        waitForIdle()
         onNodeWithContentDescription(ADD_BONSAI_BUTTON_DESCRIPTION).performClick()
         onNodeWithText(ADD_BONSAI_TITLE).assertExists()
     }
@@ -43,8 +69,10 @@ class AppNavigationTest {
     @Test
     fun submittingFormReturnsToList() = runComposeUiTest {
         val repo = InMemoryBonsaiRepository()
-        setContent { App(useDarkTheme = false, repository = repo) }
+        val manager = FakeFolderStorageManager(hasAccess = true)
+        setContent { App(useDarkTheme = false, repository = repo, folderStorageManager = manager) }
         onNodeWithText(APP_TITLE).performClick()
+        waitForIdle()
         onNodeWithContentDescription(ADD_BONSAI_BUTTON_DESCRIPTION).performClick()
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(LABEL_KIND).performTextInput("Maple")
@@ -58,8 +86,10 @@ class AppNavigationTest {
     @Test
     fun addedBonsaiAppearsInListAfterSubmit() = runComposeUiTest {
         val repo = InMemoryBonsaiRepository()
-        setContent { App(useDarkTheme = false, repository = repo) }
+        val manager = FakeFolderStorageManager(hasAccess = true)
+        setContent { App(useDarkTheme = false, repository = repo, folderStorageManager = manager) }
         onNodeWithText(APP_TITLE).performClick()
+        waitForIdle()
         onNodeWithContentDescription(ADD_BONSAI_BUTTON_DESCRIPTION).performClick()
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(LABEL_KIND).performTextInput("Maple")
