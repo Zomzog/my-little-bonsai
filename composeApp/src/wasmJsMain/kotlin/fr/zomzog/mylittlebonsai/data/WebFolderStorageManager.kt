@@ -91,10 +91,21 @@ class WebFolderStorageManager : FolderStorageManager {
 
     override suspend fun hasStorageAccess(): Boolean = hasDirHandleJs()
 
-    /** Shows the browser folder picker and stores the resulting handle. */
-    suspend fun pickFolder(): Boolean {
+    /**
+     * Starts the browser folder picker. Must be called synchronously within a user-gesture
+     * call stack (e.g. directly in a button onClick handler) so that the browser's transient
+     * activation requirement is satisfied. Call [awaitPickerResult] afterwards to poll for
+     * the outcome.
+     */
+    fun startPicker() {
         startPickerJs()
-        // Poll until the user picks a folder or cancels (the picker is modal at the OS level).
+    }
+
+    /**
+     * Polls until the picker resolves and returns `true` on success (folder chosen),
+     * `false` on cancel or error. Must be called after [startPicker].
+     */
+    suspend fun awaitPickerResult(): Boolean {
         while (!isPickerDoneJs()) {
             delay(POLL_INTERVAL_MS)
         }

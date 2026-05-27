@@ -18,8 +18,14 @@ actual fun rememberFolderPickerLauncher(
         object : FolderPickerLauncher {
             override fun launch() {
                 when (storageManager) {
-                    is WebFolderStorageManager -> scope.launch {
-                        if (storageManager.pickFolder()) onGranted() else onDenied()
+                    is WebFolderStorageManager -> {
+                        // startPicker() must be called synchronously here so the browser's
+                        // transient-activation requirement is met (window.showDirectoryPicker
+                        // only works inside a user-gesture call stack).
+                        storageManager.startPicker()
+                        scope.launch {
+                            if (storageManager.awaitPickerResult()) onGranted() else onDenied()
+                        }
                     }
                     // Any other implementation (e.g. test doubles) auto-grants so tests can
                     // exercise the post-grant navigation path without touching real browser APIs.
