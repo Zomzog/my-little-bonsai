@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -30,12 +30,27 @@ async function mockDirectoryPicker(page: Page): Promise<void> {
 }
 
 /**
- * Waits for the Compose/Wasm runtime to boot and for Compose to render its
- * first frame. We wait for the canvas element to appear and then for a piece
- * of text that is always present on the HomeScreen.
+ * Click at the visual centre of a Compose accessibility element.
+ *
+ * Compose Wasm renders to a <canvas> that intercepts all pointer events.
+ * Accessibility companion DOM nodes are reachable by Playwright selectors but
+ * cannot be clicked directly — the canvas always grabs the event first.
+ * We obtain the element's bounding box and dispatch a raw mouse click at
+ * those page coordinates so the canvas (and thereby Compose) receives the
+ * event at the correct visual position.
+ */
+async function clickComposeElement(page: Page, locator: Locator): Promise<void> {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Compose element not found or has no bounding box');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+/**
+ * Waits for the Wasm runtime to boot and Compose to render the HomeScreen.
  */
 async function waitForAppReady(page: Page): Promise<void> {
   await page.waitForSelector('canvas', { timeout: 20_000 });
+  // Compose exposes accessibility DOM nodes — wait for the HomeScreen title
   await expect(page.getByText('My Little Bonsai')).toBeVisible({
     timeout: 20_000,
   });
@@ -55,8 +70,8 @@ test.describe('Folder picker flow', () => {
   test('Choose Folder button is visible on FolderSetupScreen', async ({
     page,
   }) => {
-    // Navigate past the HomeScreen (the whole screen is clickable)
-    await page.getByText('My Little Bonsai').click();
+    // HomeScreen is a full-screen clickable column — click the canvas directly
+    await page.locator('canvas').click();
 
     await expect(
       page.getByRole('button', { name: 'Choose Folder' }),
@@ -66,17 +81,17 @@ test.describe('Folder picker flow', () => {
   test('clicking Choose Folder opens the picker and navigates to Bonsai List', async ({
     page,
   }) => {
-    // ① HomeScreen → click anywhere to proceed
-    await page.getByText('My Little Bonsai').click();
+    // ① Navigate past the HomeScreen
+    await page.locator('canvas').click();
 
     // ② FolderSetupScreen must appear with the Choose Folder button
     const chooseFolder = page.getByRole('button', { name: 'Choose Folder' });
     await expect(chooseFolder).toBeVisible({ timeout: 10_000 });
 
-    // ③ Click the button; the mocked picker resolves synchronously
-    await chooseFolder.click();
+    // ③ Click via canvas coordinates — canvas intercepts all pointer events
+    await clickComposeElement(page, chooseFolder);
 
-    // ④ App should navigate to BonsaiList
+    // ④ Mocked picker resolves immediately → app navigates to BonsaiList
     await expect(page.getByText('My Bonsais')).toBeVisible({
       timeout: 10_000,
     });
@@ -88,17 +103,18 @@ test.describe('Folder picker flow', () => {
     // Override the mock to simulate the user cancelling the picker
     await page.evaluate(() => {
       (window as Window & { showDirectoryPicker?: () => Promise<unknown> }).showDirectoryPicker =
-        () => Promise.reject(new DOMException('Aborted', 'AbortError'));
+        () =>
+          Promise.reject(new DOMException('Aborted', 'AbortError'));
     });
 
-    await page.getByText('My Little Bonsai').click();
+    await page.locator('canvas').click();
 
     const chooseFolder = page.getByRole('button', { name: 'Choose Folder' });
     await expect(chooseFolder).toBeVisible({ timeout: 10_000 });
 
-    await chooseFolder.click();
+    await clickComposeElement(page, chooseFolder);
 
-    // After cancellation the button must still be there — no navigation
+    // After cancellation the button must still be present — no navigation
     await expect(chooseFolder).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText('My Bonsais')).not.toBeVisible();
   });
