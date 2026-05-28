@@ -1,0 +1,12 @@
+{
+  "name": "my-little-bonsai-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "serve": "^14.2.3"
+  }
+}
