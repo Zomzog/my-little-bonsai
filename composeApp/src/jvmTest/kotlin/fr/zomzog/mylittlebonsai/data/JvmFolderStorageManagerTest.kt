@@ -25,4 +25,10 @@ class JvmFolderStorageManagerTest {
         val manager = JvmFolderStorageManager()
         manager.createMetadataFile()
     }
+
+    @Test
+    fun isFolderPickerSupportedReturnsTrue() {
+        val manager = JvmFolderStorageManager()
+        assertThat(manager.isFolderPickerSupported()).isTrue()
+    }
 }
