@@ -55,6 +55,9 @@ private external fun isPickerDoneJs(): Boolean
 @JsFun("() => globalThis.__bonsaiPickerSuccess === true")
 private external fun isPickerSuccessJs(): Boolean
 
+@JsFun("() => (typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function')")
+private external fun isPickerSupportedJs(): Boolean
+
 // ---------------------------------------------------------------------------
 // Metadata file creation
 // ---------------------------------------------------------------------------
@@ -90,6 +93,8 @@ private external fun setMetaContentJs(content: String)
 class WebFolderStorageManager : FolderStorageManager {
 
     override suspend fun hasStorageAccess(): Boolean = hasDirHandleJs()
+
+    override fun isFolderPickerSupported(): Boolean = isPickerSupportedJs()
 
     /**
      * Starts the browser folder picker. Must be called synchronously within a user-gesture
