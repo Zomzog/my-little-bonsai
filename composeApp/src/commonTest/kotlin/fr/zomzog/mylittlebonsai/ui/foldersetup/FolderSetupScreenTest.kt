@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import fr.zomzog.mylittlebonsai.FakeFolderStorageManager
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -82,5 +83,29 @@ class FolderSetupScreenTest {
         onNodeWithText(FOLDER_SETUP_BUTTON).performClick()
         waitForIdle()
         assertTrue(manager.metadataCreated)
+    }
+
+    @Test
+    fun unsupportedMessageHiddenByDefault() = runComposeUiTest {
+        val manager = FakeFolderStorageManager(hasAccess = false)
+        setContent { FolderSetupScreen(storageManager = manager, onFolderGranted = {}) }
+        onNodeWithText(FOLDER_SETUP_UNSUPPORTED_MESSAGE).assertDoesNotExist()
+    }
+
+    @Test
+    fun clickingChooseFolderShowsMessageWhenPickerUnsupported() = runComposeUiTest {
+        val manager = FakeFolderStorageManager(hasAccess = false, pickerSupported = false)
+        var granted = false
+        setContent {
+            FolderSetupScreen(
+                storageManager = manager,
+                onFolderGranted = { granted = true },
+            )
+        }
+        onNodeWithText(FOLDER_SETUP_BUTTON).performClick()
+        waitForIdle()
+        onNodeWithText(FOLDER_SETUP_UNSUPPORTED_MESSAGE).assertExists()
+        assertFalse(granted)
+        assertFalse(manager.metadataCreated)
     }
 }
