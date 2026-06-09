@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.3.21"
-compose = "1.11.0"
+kotlin = "2.4.0"
+compose = "1.11.1"
 compose-material3 = "1.10.0-alpha05"
 agp = "9.2.1"
 androidx-activity = "1.13.0"
