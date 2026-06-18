@@ -4,7 +4,7 @@
 2026-05-24
 
 ## Affected Spec
-[add-bonsai](../specs/add-bonsai.md)
+[bonsai-list-feature](../specs/bonsai-list-feature.md)
 
 ## Reason
 The custom `BonsaiDatePickerDialog` used an `expect`/`actual` pattern with a poor fallback
