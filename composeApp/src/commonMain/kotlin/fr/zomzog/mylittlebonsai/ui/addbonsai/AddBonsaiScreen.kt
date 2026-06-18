@@ -23,7 +23,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import fr.zomzog.mylittlebonsai.domain.Bonsai
 import fr.zomzog.mylittlebonsai.domain.BonsaiRepository
 import kotlinx.coroutines.launch
@@ -109,6 +111,7 @@ fun AddBonsaiScreen(
                 label = { Text(LABEL_NAME) },
                 isError = formState.nameError != null,
                 supportingText = formState.nameError?.let { error -> { Text(error) } },
+                textStyle = TextStyle(fontSize = 18.sp),
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
@@ -118,6 +121,7 @@ fun AddBonsaiScreen(
                 label = { Text(LABEL_KIND) },
                 isError = formState.kindError != null,
                 supportingText = formState.kindError?.let { error -> { Text(error) } },
+                textStyle = TextStyle(fontSize = 18.sp),
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
