@@ -87,12 +87,17 @@ private external fun setMetaContentJs(content: String)
 /**
  * Web implementation of [FolderStorageManager] using the File System Access API.
  *
- * The directory handle is stored in a JS module-level global and is therefore
- * lost on page reload. Full IndexedDB persistence is a future enhancement.
+ * The directory handle is kept in a JS page-session global for fast access and
+ * persisted to IndexedDB (via [IdbHandleStore]) so it survives page reloads.
  */
 class WebFolderStorageManager : FolderStorageManager {
 
-    override suspend fun hasStorageAccess(): Boolean = hasDirHandleJs()
+    override suspend fun hasStorageAccess(): Boolean {
+        if (hasDirHandleJs()) return true
+        val handle = IdbHandleStore.restore() ?: return false
+        storeDirHandleJs(handle)
+        return true
+    }
 
     override fun isFolderPickerSupported(): Boolean = isPickerSupportedJs()
 
@@ -109,12 +114,16 @@ class WebFolderStorageManager : FolderStorageManager {
     /**
      * Polls until the picker resolves and returns `true` on success (folder chosen),
      * `false` on cancel or error. Must be called after [startPicker].
+     *
+     * On success, the handle is persisted to IndexedDB so it survives page reloads.
      */
     suspend fun awaitPickerResult(): Boolean {
         while (!isPickerDoneJs()) {
             delay(POLL_INTERVAL_MS)
         }
-        return isPickerSuccessJs()
+        if (!isPickerSuccessJs()) return false
+        getDirHandleJs()?.let { IdbHandleStore.save(it) }
+        return true
     }
 
     override suspend fun createMetadataFile() {
