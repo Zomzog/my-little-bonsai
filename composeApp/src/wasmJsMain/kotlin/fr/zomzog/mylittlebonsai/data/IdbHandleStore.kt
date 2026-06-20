@@ -1,65 +1,82 @@
 package fr.zomzog.mylittlebonsai.data
 
-import kotlinx.coroutines.await
+import kotlinx.coroutines.delay
 
 // ---------------------------------------------------------------------------
-// JS interop layer — Promise-wrapping stubs only, no business logic in JS
+// Fire-and-forget save — reads handle from globalThis.__bonsaiDirHandle
 // ---------------------------------------------------------------------------
 
-@JsFun("""
-    (name, version) => new Promise((resolve, reject) => {
-        const req = indexedDB.open(name, version);
-        req.onupgradeneeded = e => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
-        };
-        req.onsuccess = e => resolve(e.target.result);
-        req.onerror = e => reject(e.target.error);
-    })
-""")
-private external fun jsOpenIdb(name: String, version: Int): JsPromise<JsAny>
+@JsFun(
+    "() => {" +
+        " const handle = globalThis.__bonsaiDirHandle;" +
+        " if (!handle) return;" +
+        " const req = indexedDB.open('bonsai-db', 1);" +
+        " req.onupgradeneeded = e => {" +
+        "   const db = e.target.result;" +
+        "   if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');" +
+        " };" +
+        " req.onsuccess = e => {" +
+        "   const tx = e.target.result.transaction('handles', 'readwrite');" +
+        "   tx.objectStore('handles').put(handle, 'bonsaiDir');" +
+        " };" +
+        "}",
+)
+private external fun startIdbSaveJs()
 
-@JsFun("""
-    (db, key, value) => new Promise((resolve, reject) => {
-        const tx = db.transaction('handles', 'readwrite');
-        tx.objectStore('handles').put(value, key);
-        tx.oncomplete = () => resolve(undefined);
-        tx.onerror = e => reject(e.target.error);
-    })
-""")
-private external fun jsIdbPut(db: JsAny, key: String, value: JsAny): JsPromise<JsAny?>
+// ---------------------------------------------------------------------------
+// Polling-based restore — writes result to globalThis flags
+// ---------------------------------------------------------------------------
 
-@JsFun("""
-    (db, key) => new Promise((resolve, reject) => {
-        const tx = db.transaction('handles', 'readonly');
-        const req = tx.objectStore('handles').get(key);
-        req.onsuccess = e => resolve(e.target.result || null);
-        req.onerror = e => reject(e.target.error);
-    })
-""")
-private external fun jsIdbGet(db: JsAny, key: String): JsPromise<JsAny?>
+@JsFun(
+    "() => {" +
+        " globalThis.__bonsaiIdbDone = false;" +
+        " globalThis.__bonsaiIdbHandle = null;" +
+        " const openReq = indexedDB.open('bonsai-db', 1);" +
+        " openReq.onupgradeneeded = e => {" +
+        "   const db = e.target.result;" +
+        "   if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');" +
+        " };" +
+        " openReq.onerror = () => { globalThis.__bonsaiIdbDone = true; };" +
+        " openReq.onsuccess = e => {" +
+        "   const db = e.target.result;" +
+        "   const tx = db.transaction('handles', 'readonly');" +
+        "   const getReq = tx.objectStore('handles').get('bonsaiDir');" +
+        "   getReq.onerror = () => { globalThis.__bonsaiIdbDone = true; };" +
+        "   getReq.onsuccess = e => {" +
+        "     const handle = e.target.result;" +
+        "     if (!handle) { globalThis.__bonsaiIdbDone = true; return; }" +
+        "     handle.queryPermission({ mode: 'readwrite' })" +
+        "       .then(perm => {" +
+        "         if (perm === 'granted') globalThis.__bonsaiIdbHandle = handle;" +
+        "         globalThis.__bonsaiIdbDone = true;" +
+        "       })" +
+        "       .catch(() => { globalThis.__bonsaiIdbDone = true; });" +
+        "   };" +
+        " };" +
+        "}",
+)
+private external fun startIdbRestoreJs()
 
-@JsFun("(handle) => handle.queryPermission({ mode: 'readwrite' })")
-private external fun jsQueryPermission(handle: JsAny): JsPromise<JsString>
+@JsFun("() => globalThis.__bonsaiIdbDone === true")
+private external fun isIdbDoneJs(): Boolean
+
+@JsFun("() => { const h = globalThis.__bonsaiIdbHandle; return (h !== undefined && h !== null) ? h : null; }")
+private external fun getIdbHandleJs(): JsAny?
 
 // ---------------------------------------------------------------------------
 
 internal object IdbHandleStore {
-    private const val DB_NAME = "bonsai-db"
-    private const val DB_VERSION = 1
-    private const val HANDLE_KEY = "bonsaiDir"
+    private const val POLL_INTERVAL_MS = 100L
 
-    suspend fun save(handle: JsAny) {
-        runCatching {
-            val db = jsOpenIdb(DB_NAME, DB_VERSION).await()
-            jsIdbPut(db, HANDLE_KEY, handle).await()
-        }
+    fun save() {
+        startIdbSaveJs()
     }
 
-    suspend fun restore(): JsAny? = runCatching {
-        val db = jsOpenIdb(DB_NAME, DB_VERSION).await()
-        val handle = jsIdbGet(db, HANDLE_KEY).await() ?: return@runCatching null
-        val permission = jsQueryPermission(handle).await()
-        if (permission.toString() == "granted") handle else null
-    }.getOrNull()
+    suspend fun restore(): JsAny? {
+        startIdbRestoreJs()
+        while (!isIdbDoneJs()) {
+            delay(POLL_INTERVAL_MS)
+        }
+        return getIdbHandleJs()
+    }
 }

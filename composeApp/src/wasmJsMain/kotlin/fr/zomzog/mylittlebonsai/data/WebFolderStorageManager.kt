@@ -122,7 +122,7 @@ class WebFolderStorageManager : FolderStorageManager {
             delay(POLL_INTERVAL_MS)
         }
         if (!isPickerSuccessJs()) return false
-        getDirHandleJs()?.let { IdbHandleStore.save(it) }
+        IdbHandleStore.save()
         return true
     }
 
