@@ -2,9 +2,10 @@ package fr.zomzog.mylittlebonsai
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
-import kotlinx.browser.document
+
+private const val VIEWPORT_CONTAINER_ID = "composeTarget"
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    ComposeViewport(document.body!!) { App() }
+    ComposeViewport(viewportContainerId = VIEWPORT_CONTAINER_ID) { App() }
 }

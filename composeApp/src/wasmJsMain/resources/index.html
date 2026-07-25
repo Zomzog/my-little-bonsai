@@ -2,14 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Little Bonsai</title>
     <style>
-        html, body { margin: 0; padding: 0; height: 100%; }
-        body { background: #FFFBFE; }
+        :root { color-scheme: light dark; }
+
+        /* The Compose canvas cannot reflow, so the page must never scroll or
+           zoom: any overflow makes mobile Chrome rescale the whole document. */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            background: #FFFBFE;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html, body { background: #1C1B1F; }
+        }
+
+        /* Compose sizes its canvas from this container's clientWidth/clientHeight.
+           `fixed` + `inset: 0` pins it to the viewport, so the canvas it hosts can
+           never feed back into the container's own size. */
+        #composeTarget {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
+<div id="composeTarget"></div>
+<script>
+    // Compose only re-measures its container on window "resize". Mobile browsers
+    // settle the viewport after the app has booted (URL bar collapsing, rotation,
+    // virtual keyboard), which would otherwise leave the canvas at a stale size.
+    (function () {
+        function remeasure() {
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        window.addEventListener('load', remeasure);
+        window.addEventListener('orientationchange', remeasure);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', remeasure);
+        }
+    })();
+</script>
 <script src="composeApp.js"></script>
 </body>
 </html>
