@@ -8,8 +8,10 @@
     <style>
         :root { color-scheme: light dark; }
 
-        /* The Compose canvas cannot reflow, so the page must never scroll or
-           zoom: any overflow makes mobile Chrome rescale the whole document. */
+        /* Compose measures <body> and sizes its canvas to it, so <body> is held
+           at exactly the viewport size. The canvas cannot reflow, so the page
+           must never scroll or zoom either: any overflow makes mobile Chrome
+           rescale the whole document. */
         html, body {
             margin: 0;
             padding: 0;
@@ -18,29 +20,36 @@
             overflow: hidden;
             overscroll-behavior: none;
             background: #FFFBFE;
+            color: #1C1B1F;
+            font-family: system-ui, sans-serif;
         }
 
         @media (prefers-color-scheme: dark) {
-            html, body { background: #1C1B1F; }
+            html, body { background: #1C1B1F; color: #E6E1E5; }
         }
 
-        /* Compose sizes its canvas from this container's clientWidth/clientHeight.
-           `fixed` + `inset: 0` pins it to the viewport, so the canvas it hosts can
-           never feed back into the container's own size. */
-        #composeTarget {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
+        /* Replaced by the Compose canvas once the app mounts — if it is still
+           on screen, start-up failed. */
+        #bootstrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 24px;
+            box-sizing: border-box;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-<div id="composeTarget"></div>
+<div id="bootstrap">Loading…</div>
 <script>
-    // Compose only re-measures its container on window "resize". Mobile browsers
-    // settle the viewport after the app has booted (URL bar collapsing, rotation,
-    // virtual keyboard), which would otherwise leave the canvas at a stale size.
     (function () {
+        // Compose only re-measures its container on window "resize". Mobile
+        // browsers settle the viewport after the app has booted (URL bar
+        // collapsing, rotation, virtual keyboard), which would otherwise leave
+        // the canvas at a stale size.
         function remeasure() {
             window.dispatchEvent(new Event('resize'));
         }
@@ -50,6 +59,15 @@
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', remeasure);
         }
+
+        // A failed start-up leaves an empty page, which is indistinguishable
+        // from a rendering bug. Surface the error instead.
+        window.addEventListener('error', function (event) {
+            var bootstrap = document.getElementById('bootstrap');
+            if (bootstrap) {
+                bootstrap.textContent = 'Failed to start: ' + (event.message || 'unknown error');
+            }
+        });
     })();
 </script>
 <script src="composeApp.js"></script>
