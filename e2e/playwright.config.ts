@@ -23,5 +23,12 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    // Mobile emulation applies the viewport meta tag the way Android Chrome
+    // does, so host-page sizing regressions are caught here.
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 5'] },
+      testMatch: /viewport\.spec\.ts/,
+    },
   ],
 });
