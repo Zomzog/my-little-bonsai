@@ -56,6 +56,12 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.androidx.activity.compose)
+            }
+        }
+
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
@@ -65,6 +71,15 @@ kotlin {
 }
 
 kover {
+    // androidMain uses Android SAF/Compose APIs that require on-device testing and
+    // cannot be reached by the JVM Kover task; exclude it so the report is
+    // consistent with wasmJsMain (which is also not instrumented by JVM Kover).
+    currentProject {
+        sources {
+            excludedSourceSets.add("androidMain")
+        }
+    }
+
     reports {
         filters {
             excludes {
@@ -72,6 +87,9 @@ kover {
                     "mylittlebonsai.composeapp.generated.resources.*",
                     "*ComposableSingletons*",
                     "*\$WhenMappings",
+                    // androidMain classes require on-device tests; excluded from JVM coverage
+                    "*AndroidFolderStorageManager*",
+                    "*.foldersetup.FolderPickerSupportKt\$rememberFolderPickerLauncher\$*",
                 )
                 annotatedBy("androidx.compose.ui.tooling.preview.Preview")
             }

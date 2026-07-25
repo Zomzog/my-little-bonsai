@@ -1,0 +1,44 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  // Start from the recommended preset (security advisories, group monorepos, etc.)
+  extends: ["config:recommended"],
+
+  // Run once a week — Monday before 06:00, same cadence as the old Dependabot config
+  schedule: ["before 6am on monday"],
+
+  // Every Renovate PR gets the "dependencies" label
+  labels: ["dependencies"],
+
+  // Enable auto-merge: Renovate uses GitHub's native auto-merge so the PR merges
+  // automatically once all required CI checks pass
+  automerge: true,
+  platformAutomerge: true,
+
+  // Rebase automatically whenever the base branch advances, satisfying the
+  // "branch must be up to date" branch-protection rule
+  rebaseWhen: "behind-base-branch",
+
+  packageRules: [
+    {
+      // Mirror Dependabot's "direct:production" label — tag direct Gradle
+      // production configurations with the "production" label
+      matchManagers: ["gradle", "gradle-wrapper"],
+      matchDepTypes: [
+        "implementation",
+        "api",
+        "compileOnly",
+        "runtimeOnly",
+        "annotationProcessor",
+        "kapt",
+        "classpath",
+      ],
+      addLabels: ["production"],
+    },
+    {
+      // GitHub Actions updates are always production
+      matchManagers: ["github-actions"],
+      addLabels: ["production"],
+    },
+  ],
+}
