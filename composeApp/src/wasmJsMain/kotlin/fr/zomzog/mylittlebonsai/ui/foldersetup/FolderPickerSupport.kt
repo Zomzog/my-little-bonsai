@@ -2,40 +2,24 @@ package fr.zomzog.mylittlebonsai.ui.foldersetup
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import fr.zomzog.mylittlebonsai.data.WebFolderStorageManager
+import fr.zomzog.mylittlebonsai.data.BrowserStorageManager
 import fr.zomzog.mylittlebonsai.domain.FolderStorageManager
-import kotlinx.coroutines.launch
 
+/**
+ * Web never shows the folder-setup screen — [BrowserStorageManager] always reports
+ * access — so the launcher only has to satisfy the shared contract.
+ */
 @Composable
 actual fun rememberFolderPickerLauncher(
     storageManager: FolderStorageManager,
     onGranted: () -> Unit,
     onDenied: () -> Unit,
-): FolderPickerLauncher {
-    val scope = rememberCoroutineScope()
-    return remember {
-        object : FolderPickerLauncher {
-            override fun launch() {
-                when (storageManager) {
-                    is WebFolderStorageManager -> {
-                        // startPicker() must be called synchronously here so the browser's
-                        // transient-activation requirement is met (window.showDirectoryPicker
-                        // only works inside a user-gesture call stack).
-                        storageManager.startPicker()
-                        scope.launch {
-                            if (storageManager.awaitPickerResult()) onGranted() else onDenied()
-                        }
-                    }
-                    // Any other implementation (e.g. test doubles) auto-grants so tests can
-                    // exercise the post-grant navigation path without touching real browser APIs.
-                    else -> onGranted()
-                }
-            }
-        }
+): FolderPickerLauncher = remember {
+    object : FolderPickerLauncher {
+        override fun launch() = onGranted()
     }
 }
 
 @Composable
 actual fun rememberFolderStorageManager(provided: FolderStorageManager?): FolderStorageManager =
-    remember { provided ?: WebFolderStorageManager() }
+    remember { provided ?: BrowserStorageManager() }
