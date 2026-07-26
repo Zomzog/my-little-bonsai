@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kover)
 }
 
@@ -47,6 +48,7 @@ kotlin {
             implementation(libs.components.resources)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         commonTest.dependencies {
