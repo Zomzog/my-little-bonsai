@@ -63,25 +63,26 @@ test.describe('Viewport fit', () => {
  */
 test.describe('Layout scale', () => {
   /**
-   * Measures the home title, whose height in CSS pixels follows the density the
-   * UI is composed with. Compose re-measures asynchronously after a resize, so
-   * the value is polled until two consecutive reads agree.
+   * The accessibility overlay mirrors every semantics node with a DOM box sized
+   * from the density that node was laid out with, so the box of the full-screen
+   * home container reports the app's *logical* width — what the cap constrains.
    */
-  async function titleHeight(
+  async function logicalWidth(
     page: Page,
     width: number,
     height: number,
   ): Promise<number> {
     await page.setViewportSize({ width, height });
-    const title = page.getByText('My Little Bonsai');
-    await expect(title).toBeVisible({ timeout: 20_000 });
+    const home = page.getByText('My Little Bonsai');
+    await expect(home).toBeVisible({ timeout: 20_000 });
 
+    // Compose re-measures asynchronously after a resize; poll until two reads agree.
     let previous = -1;
     let settled = -1;
     await expect
       .poll(async () => {
-        const box = await title.boundingBox();
-        const current = box ? Math.round(box.height) : -1;
+        const box = await home.boundingBox();
+        const current = box ? Math.round(box.width) : -1;
         const isSettled = current > 0 && current === previous;
         previous = current;
         if (isSettled) settled = current;
@@ -91,34 +92,32 @@ test.describe('Layout scale', () => {
     return settled;
   }
 
+  function expectAbout(actual: number, expected: number): void {
+    expect(Math.abs(actual - expected)).toBeLessThanOrEqual(2);
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('canvas', { timeout: 20_000 });
   });
 
-  test('a desktop-width touch viewport is laid out at phone scale', async ({
+  test('a touch viewport is never laid out wider than the cap', async ({
     page,
     isMobile,
   }) => {
     test.skip(!isMobile, 'the cap only applies to coarse-pointer viewports');
 
-    const atCap = await titleHeight(page, 480, 851);
-    const atDouble = await titleHeight(page, 960, 851);
-
-    expect(atDouble / atCap).toBeGreaterThan(1.8);
-    expect(atDouble / atCap).toBeLessThan(2.2);
+    expectAbout(await logicalWidth(page, 400, 851), 400);
+    expectAbout(await logicalWidth(page, 960, 851), 480);
   });
 
-  test('a mouse-driven window keeps its own scale', async ({
+  test('a mouse-driven window is laid out at its own width', async ({
     page,
     isMobile,
   }) => {
     test.skip(isMobile, 'covered by the touch viewport test');
 
-    const narrow = await titleHeight(page, 640, 800);
-    const wide = await titleHeight(page, 1280, 800);
-
-    expect(wide / narrow).toBeGreaterThan(0.9);
-    expect(wide / narrow).toBeLessThan(1.1);
+    expectAbout(await logicalWidth(page, 640, 800), 640);
+    expectAbout(await logicalWidth(page, 1280, 800), 1280);
   });
 });

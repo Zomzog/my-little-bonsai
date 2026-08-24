@@ -33,8 +33,11 @@ fun touchLayoutScale(viewportWidthDp: Float, isCoarsePointer: Boolean): Float =
 
 /**
  * Applies [touchLayoutScale] to [content] by scaling the density it is composed
- * with, leaving the window density — and with it pointer and accessibility
- * coordinates — untouched.
+ * with. Pointer input is unaffected: the window maps browser coordinates into
+ * scene pixels with its own density and hit-tests in pixels. The web
+ * accessibility overlay is not — it sizes its DOM boxes from the density a node
+ * was laid out with, so on a capped viewport they describe the layout in
+ * logical pixels instead of CSS pixels.
  */
 @Composable
 fun TouchLayoutScale(

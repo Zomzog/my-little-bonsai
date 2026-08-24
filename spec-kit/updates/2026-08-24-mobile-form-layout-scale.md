@@ -39,10 +39,11 @@ meta, so the app has to stay usable when it is ignored.
 - `composeApp/src/commonMain/.../ui/layout/TouchLayoutScale.kt` (new):
   `touchLayoutScale()` caps the logical width of a coarse-pointer viewport at
   `MAX_TOUCH_LAYOUT_WIDTH_DP` (480 dp); the `TouchLayoutScale` composable
-  applies the cap by scaling the density its content is composed with. The
-  window density is untouched, so pointer and accessibility coordinates keep
-  matching the canvas. A 980 CSS px viewport is laid out as 480 dp stretched
-  across the screen — phone proportions, at twice the size.
+  applies the cap by scaling the density its content is composed with. A 980 CSS
+  px viewport is laid out as 480 dp stretched across the screen — phone
+  proportions, at twice the size. Pointer input is unaffected: the window maps
+  browser coordinates into scene pixels with its own density and hit-tests in
+  pixels.
 - `composeApp/src/wasmJsMain/.../main.kt`: wraps `App()` in `TouchLayoutScale`.
   Touch is detected from the input device — `(pointer: coarse)`, or touch points
   plus `(hover: none)` — because a browser in desktop mode misreports the
@@ -58,8 +59,9 @@ meta, so the app has to stay usable when it is ignored.
   view instead of the browser panning a canvas that cannot reflow.
 - Tests: `TouchLayoutScaleTest` covers the cap and the density it composes with;
   `AddBonsaiScreenTest` reaches the Add button through a viewport too short for
-  the form; `e2e/tests/viewport.spec.ts` asserts a desktop-width touch viewport
-  is laid out at phone scale and that a mouse-driven window is not rescaled.
+  the form; `e2e/tests/viewport.spec.ts` asserts a touch viewport is never laid
+  out wider than the cap (400 CSS px stays 400, 960 becomes 480) while a
+  mouse-driven window keeps its own width.
 
 ### Platform differences
 The layout cap is web-only: Android windows report their real size, so nothing
@@ -70,6 +72,16 @@ is what the web build now mirrors.
 No data or API changes. A phone-sized web viewport (≤ 480 dp) renders exactly as
 before. A coarse-pointer viewport wider than 480 dp — a browser in desktop mode,
 or a tablet — now renders a scaled-up phone layout instead of a stretched one.
+
+### Known limitation
+Compose's web accessibility overlay sizes each mirrored DOM box from
+`layoutNode.density` (`ComposeWebSemanticsListener`), i.e. the density the node
+was laid out with. On a capped viewport those boxes therefore describe the
+layout in logical pixels: they sit at `1 / scale` of their on-screen position
+and size. Correcting them means reaching into Compose's internal shadow DOM to
+counter-transform the a11y container, which is not worth the coupling — the cap
+only applies to viewports that were unreadable before this change. The e2e
+assertions read those boxes deliberately, as the app's logical size.
 
 ## Open Questions
 - Why Chrome ignores `width=device-width` on the reporter's device is not
