@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- interactive-widget=resizes-content makes the virtual keyboard shrink the
+         layout viewport, so Compose re-measures and scrolls the focused field into
+         view the way the Android app does, instead of the browser panning a canvas
+         that cannot reflow. -->
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>My Little Bonsai</title>
     <style>
         :root { color-scheme: light dark; }
