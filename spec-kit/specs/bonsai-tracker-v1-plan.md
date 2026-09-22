@@ -45,7 +45,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
 | D10 | Managed lists | Species, actions, soils, styles, fertilizers, treatments, pots (and substrates, D11). |
 | D11 | Substrates | Compositions of soils with percentages that add up to 100%. There are two forms: **named reusable mixes** (a managed list) and **inline mixes** typed for one bonsai or one repotting, so the user doesn't have to create a named mix every time. When a named mix that is in use changes, the app offers to **keep history** (existing usages become inline copies of the old composition) or **apply everywhere**. Full versioning of compositions is future work. |
 | D12 | Style picture | Pre-made illustrations are bundled for the default styles. A user-added style gets a picture uploaded by the user or a placeholder. No runtime AI. |
-| D13 | Age | Either a **birthday** (computed age) or a **frozen number in years only**, entered by the user, which does not grow. Anything more precise than years is a birthday. Display: days if under 2 months, months if under 24 months, then years. |
+| D13 | Age | Either a **birthday** (computed age) or a **frozen number in years only**, entered by the user, which does not grow. Anything more precise than years is a birthday, which can be partial (year + month, with the 1st of the month assumed). Display: days if under 2 months, months if under 24 months, then years. |
 | D14 | Units | Stored as metric. Metric or imperial display is a preference. |
 | D15 | Language | English and French, following the device locale. Defaults are translated. Species are keyed by Latin name. |
 | D16 | Main page | Cards with cover photo, name, species, age, last size and last activity. Fuzzy search on name. Filters: species, style, height range, age range, last activity. Sort: name, age, height, last activity, date added. "Last activity" means any action in v1. |
@@ -238,5 +238,8 @@ Start the #96 spike early, because its findings may change other issues.
   same pot. Each pot has a bought date that defaults to the date it was created. Unused-pot
   tracking and quantities are future work (#115).
 
+- **Partial birthday**: allowed (year + month without a day). The first day of the month
+  is assumed when computing the age.
+
 ## Open Questions
-- Birthday: can it be partial (year + month without a day)? If so, what day is assumed?
+- None at the moment.
