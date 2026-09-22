@@ -26,7 +26,7 @@ class UnsupportedBrowserScreenTest {
     @Test
     fun showsTitleExplanationAndSupportedBrowsers() = runComposeUiTest {
         setContent { UnsupportedBrowserScreen(onOpenMobileApp = {}) }
-        waitUntil(LOAD_TIMEOUT_MILLIS) {
+        waitUntil(timeoutMillis = LOAD_TIMEOUT_MILLIS) {
             onAllNodesWithText(TITLE).fetchSemanticsNodes().isNotEmpty()
         }
 
@@ -38,7 +38,7 @@ class UnsupportedBrowserScreenTest {
     @Test
     fun showsMobileAppLink() = runComposeUiTest {
         setContent { UnsupportedBrowserScreen(onOpenMobileApp = {}) }
-        waitUntil(LOAD_TIMEOUT_MILLIS) {
+        waitUntil(timeoutMillis = LOAD_TIMEOUT_MILLIS) {
             onAllNodesWithText(MOBILE_APP_LINK).fetchSemanticsNodes().isNotEmpty()
         }
 
@@ -49,7 +49,7 @@ class UnsupportedBrowserScreenTest {
     fun clickingMobileAppLinkInvokesCallback() = runComposeUiTest {
         var clicked = false
         setContent { UnsupportedBrowserScreen(onOpenMobileApp = { clicked = true }) }
-        waitUntil(LOAD_TIMEOUT_MILLIS) {
+        waitUntil(timeoutMillis = LOAD_TIMEOUT_MILLIS) {
             onAllNodesWithText(MOBILE_APP_LINK).fetchSemanticsNodes().isNotEmpty()
         }
 
