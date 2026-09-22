@@ -38,9 +38,17 @@ test.describe('Unsupported browser page', () => {
     });
     await expect(mobileAppButton).toBeVisible({ timeout: 20_000 });
 
+    // The accessibility node isn't the real click target: Compose for Web
+    // renders and handles pointer input on the <canvas> on top of it, the
+    // same reason other specs click the canvas rather than a locator
+    // (see `enterApp` in browser-storage.spec.ts). Click the canvas at the
+    // button's on-screen position instead of the (intercepted) locator.
+    const box = await mobileAppButton.boundingBox();
+    if (!box) throw new Error('mobile app button has no bounding box');
+
     const [popup] = await Promise.all([
       context.waitForEvent('page'),
-      mobileAppButton.click(),
+      page.mouse.click(box.x + box.width / 2, box.y + box.height / 2),
     ]);
     await popup.waitForLoadState('domcontentloaded');
     expect(popup.url()).toBe(MOBILE_APP_URL);
