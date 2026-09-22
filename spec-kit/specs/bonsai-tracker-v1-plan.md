@@ -25,6 +25,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
   - Referencing external pictures instead of copying them into the vault
   - Web support beyond Chromium browsers
   - Real store link instead of the placeholder (see existing issue #15)
+  - Versioning of substrate compositions
 - Non-goals: built-in sync, accounts, any server or cloud component, runtime AI generation.
 
 ## Decisions log (from the planning Q&A)
@@ -41,7 +42,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
 | D8 | Reference lists | Defaults ship inside the app. The vault holds an overlay YAML with the user's additions and removed defaults. |
 | D9 | Removing items | To the user it is always "remove". For a default entry, "remove" means adding it to the overlay's removed list, because defaults can't be edited. Removing is **blocked while the item is in use**: the screen shows a usage count, and tapping it lists the bonsais that use the item. |
 | D10 | Managed lists | Species, actions, soils, styles, fertilizers, treatments, pots (and substrates, D11). |
-| D11 | Substrates | Named reusable mixes of soils with percentages that add up to 100%. They are a managed list too. |
+| D11 | Substrates | Compositions of soils with percentages that add up to 100%. There are two forms: **named reusable mixes** (a managed list) and **inline mixes** typed for one bonsai or one repotting, so the user doesn't have to create a named mix every time. When a named mix that is in use changes, the app offers to **keep history** (existing usages become inline copies of the old composition) or **apply everywhere**. Full versioning of compositions is future work. |
 | D12 | Style picture | Pre-made illustrations are bundled for the default styles. A user-added style gets a picture uploaded by the user or a placeholder. No runtime AI. |
 | D13 | Age | Either a **birthday** (computed age) or a **frozen number** entered by the user, which does not grow. Display: days if under 2 months, months if under 24 months, then years. |
 | D14 | Units | Stored as metric. Metric or imperial display is a preference. |
@@ -95,7 +96,7 @@ the same way:
 - Each list has a dedicated management page or pop-up with add, edit (user entries only)
   and remove.
 - Remove is blocked while the item is referenced. The page shows "used by N" and tapping
-  it lists the bonsais. A soil used by a substrate counts as in use.
+  it lists the bonsais. A soil used by a named or an inline substrate mix counts as in use.
 - Default entries have stable ids and EN/FR labels. User entries have the user's label only.
 - App updates can add new defaults without touching the user's overlay.
 
@@ -178,7 +179,7 @@ Epic: #73
    - #82 Species (~40, EN/FR, categories)
    - #83 Styles + bundled illustrations
    - #84 Actions, soils, fertilizers, treatments, pots
-7. #85 **Substrates**: named soil mixes that total 100%.
+7. #85 **Substrates**: named and inline soil mixes that total 100%, and what happens when a used mix is edited.
 8. #86 **Bonsai profile & lifecycle**
    - #87 Profile create/edit page
    - #88 Age (birthday / frozen) + display rule
@@ -204,6 +205,7 @@ Epic: #73
     - #108 Web support beyond Chromium
     - #109 Reminders & notifications
     - #110 Replace the store placeholder link (relates to #15)
+    - #112 Versioning of substrate compositions
 
 ### Suggested order
 #74 → (#75, #76) → #79 → #80 → #81 → #85 → #86 → #104 → #90 → #94 → #95 → #100.
