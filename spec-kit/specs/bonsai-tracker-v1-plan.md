@@ -99,7 +99,8 @@ the same way:
 - Each list has a dedicated management page or pop-up with add, edit (user entries only)
   and remove.
 - Remove is blocked while the item is referenced. The page shows "used by N" and tapping
-  it lists the bonsais. A soil used by a named or an inline substrate mix counts as in use.
+  it lists the bonsais, archived ones included (they count as in use). A soil used by a
+  named or an inline substrate mix counts as in use. Typed actions can never be removed.
 - Default entries have stable ids and EN/FR labels. User entries have the user's label only.
 - App updates can add new defaults without touching the user's overlay.
 
@@ -184,6 +185,7 @@ Epic: #73
    - #83 Styles + bundled illustrations
    - #84 Actions, soils, fertilizers, treatments, pots
 7. #85 **Substrates**: named and inline soil mixes that total 100%, and what happens when a used mix is edited.
+   - #117 Promote an inline mix to a named mix ("save as…")
 8. #86 **Bonsai profile & lifecycle**
    - #87 Profile create/edit page
    - #88 Age (birthday / frozen) + display rule
@@ -241,14 +243,10 @@ Start the #96 spike early, because its findings may change other issues.
 
 - **Partial birthday**: allowed (year + month without a day). The first day of the month
   is assumed when computing the age.
+- **Typed actions** (measuring, repotting, fertilizing, treatment) can't be removed (#84).
+- **Archived bonsais count as "in use"** when removing a list item (#89).
+- **Inline mix → named mix** ("save as…") is in v1, as its own task (#117).
 
 ## Open Questions
-Product decisions still to confirm (each has a recommendation in its issue):
-- Can typed actions (measuring, repotting, fertilizing, treatment) be removed? Recommended:
-  no, since the app logic relies on them (#84).
-- Do archived bonsais count as "in use" when removing a list item? Recommended: yes, since
-  their history references it (#89).
-- Can an inline substrate mix be promoted to a named mix ("save as…")? Nice to have (#85).
-
-Finer details (field lists, how missing values are handled in filters, and so on) are
-settled in each child issue's own spec.
+- None at the product level. Finer details (field lists, how missing values are handled
+  in filters, and so on) are settled in each child issue's own spec.
