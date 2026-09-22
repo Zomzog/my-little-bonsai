@@ -28,7 +28,7 @@ kotlin {
 
     android {
         namespace = "fr.zomzog.mylittlebonsai"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 29
 
         androidResources {

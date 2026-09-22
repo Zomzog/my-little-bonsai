@@ -21,12 +21,12 @@ dependencies {
 
 android {
     namespace = "fr.zomzog.mylittlebonsai.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "fr.zomzog.mylittlebonsai"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
     }
