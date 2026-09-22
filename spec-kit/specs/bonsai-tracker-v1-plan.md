@@ -122,11 +122,12 @@ measuring action. The main page shows the latest value of each field. A size his
 is available on the bonsai page. Values are stored metric (cm, g).
 
 ### Age display rule
-Let `d` be the age in days, computed from the birthday or taken from the frozen number
-(converted to days):
+For a birthday (full or partial), let `d` be the age in days computed from it:
 - under 2 months → "N days"
 - under 24 months → "N months"
 - otherwise → "N years"
+
+A frozen number is entered in years, so it is always displayed as "N years".
 
 ### Pictures
 - Pictures can be added to the bonsai description or to a session.
@@ -242,4 +243,12 @@ Start the #96 spike early, because its findings may change other issues.
   is assumed when computing the age.
 
 ## Open Questions
-- None at the moment.
+Product decisions still to confirm (each has a recommendation in its issue):
+- Can typed actions (measuring, repotting, fertilizing, treatment) be removed? Recommended:
+  no, since the app logic relies on them (#84).
+- Do archived bonsais count as "in use" when removing a list item? Recommended: yes, since
+  their history references it (#89).
+- Can an inline substrate mix be promoted to a named mix ("save as…")? Nice to have (#85).
+
+Finer details (field lists, how missing values are handled in filters, and so on) are
+settled in each child issue's own spec.
