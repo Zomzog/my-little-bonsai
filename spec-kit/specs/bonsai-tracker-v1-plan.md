@@ -26,6 +26,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
   - Web support beyond Chromium browsers
   - Real store link instead of the placeholder (see existing issue #15)
   - Versioning of substrate compositions
+  - "Last activity" filter by action type, species categories, pot inventory
 - Non-goals: built-in sync, accounts, any server or cloud component, runtime AI generation.
 
 ## Decisions log (from the planning Q&A)
@@ -44,15 +45,17 @@ work starts on it, as `.claude/CLAUDE.md` requires.
 | D10 | Managed lists | Species, actions, soils, styles, fertilizers, treatments, pots (and substrates, D11). |
 | D11 | Substrates | Compositions of soils with percentages that add up to 100%. There are two forms: **named reusable mixes** (a managed list) and **inline mixes** typed for one bonsai or one repotting, so the user doesn't have to create a named mix every time. When a named mix that is in use changes, the app offers to **keep history** (existing usages become inline copies of the old composition) or **apply everywhere**. Full versioning of compositions is future work. |
 | D12 | Style picture | Pre-made illustrations are bundled for the default styles. A user-added style gets a picture uploaded by the user or a placeholder. No runtime AI. |
-| D13 | Age | Either a **birthday** (computed age) or a **frozen number** entered by the user, which does not grow. Display: days if under 2 months, months if under 24 months, then years. |
+| D13 | Age | Either a **birthday** (computed age) or a **frozen number in years only**, entered by the user, which does not grow. Anything more precise than years is a birthday. Display: days if under 2 months, months if under 24 months, then years. |
 | D14 | Units | Stored as metric. Metric or imperial display is a preference. |
 | D15 | Language | English and French, following the device locale. Defaults are translated. Species are keyed by Latin name. |
-| D16 | Main page | Cards with cover photo, name, species, age, last size and last activity. Fuzzy search on name. Filters: species, style, height range, age range, last activity. Sort: name, age, height, last activity, date added. |
+| D16 | Main page | Cards with cover photo, name, species, age, last size and last activity. Fuzzy search on name. Filters: species, style, height range, age range, last activity. Sort: name, age, height, last activity, date added. "Last activity" means any action in v1. |
 | D17 | External edits | **Strict** in v1: an invalid vault is not opened, and the app shows a report of the invalid files. The app reloads when it is resumed or focused. Tolerant mode is future work. |
 | D18 | Reminders | Out of scope, tracked as future work. |
 | D19 | Photo import | User preference. **Original** by default, optional resize and re-encode. |
 | D20 | Existing data | Dropped (pre-1.0). The Web `localStorage` data and the Android in-memory data are not migrated. |
-| D21 | Default species | About 40 common bonsai species, each with EN/FR names and a category. |
+| D21 | Default species | About 40 common bonsai species, each with EN/FR names. No categories in v1: the list is shown in alphabetical order. |
+| D22 | Pots | A catalogue entry, not a unique object: several bonsais can reference the same pot. Each pot has a bought date that defaults to its creation date. |
+| D23 | File naming | Renaming a bonsai renames its folder. Sessions are named `YYYY-MM-DD-HHmm.md`. |
 
 ## Design (functional)
 
@@ -75,7 +78,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
     └── <bonsai-slug>/
         ├── bonsai.md           # front-matter = profile, body = free description
         ├── sessions/
-        │   └── YYYY-MM-DD-<n>.md   # front-matter = actions, body = notes
+        │   └── YYYY-MM-DD-HHmm.md  # front-matter = actions, body = notes
         └── attachments/
             └── *.jpg|png|…
 ```
@@ -86,7 +89,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
 - Pictures are embedded as `![[attachments/…]]`, so they render in Obsidian
   ([Obsidian help — Embed files](https://help.obsidian.md/embeds)).
 - Every entity has a stable `id` in its front-matter, and references between entities
-  use ids. Whether renaming a bonsai also renames its folder is an open question.
+  use ids. Renaming a bonsai renames its folder (D23).
 
 ### Managed reference lists (shared behaviour)
 Species, actions, soils, substrates, styles, fertilizers, treatments and pots all behave
@@ -176,7 +179,7 @@ Epic: #73
 5. #80 **Managed reference lists engine**: overlay YAML, add/remove, in-use check, usage
    list, generic management page.
 6. #81 **Default catalogues**
-   - #82 Species (~40, EN/FR, categories)
+   - #82 Species (~40, EN/FR, alphabetical)
    - #83 Styles + bundled illustrations
    - #84 Actions, soils, fertilizers, treatments, pots
 7. #85 **Substrates**: named and inline soil mixes that total 100%, and what happens when a used mix is edited.
@@ -206,6 +209,9 @@ Epic: #73
     - #109 Reminders & notifications
     - #110 Replace the store placeholder link (relates to #15)
     - #112 Versioning of substrate compositions
+    - #113 "Last activity" filter by action type
+    - #114 Species categories
+    - #115 Pot inventory: unused pots & quantities
 
 ### Suggested order
 #74 → (#75, #76) → #79 → #80 → #81 → #85 → #86 → #104 → #90 → #94 → #95 → #100.
@@ -219,14 +225,18 @@ Start the #96 spike early, because its findings may change other issues.
 - [ ] A vault created by the app opens in Obsidian and shows profiles, sessions and photos
 - [ ] Coverage stays at the 100% target
 
+## Resolved Questions (PR #111 review)
+- **Renaming a bonsai renames its folder**, so the vault stays clean (Obsidian renames the
+  file when a note is renamed). References use ids and embeds are relative, so nothing breaks.
+- **Session file name**: `YYYY-MM-DD-HHmm.md` (creation time to the minute). Only in the
+  rare case of two sessions created in the same minute is a `-2` suffix added.
+- **Frozen age**: years only. Anything more precise (a month or a day) is a birthday.
+- **"Last activity" filter**: any action in v1. Filtering by action type is future work (#113).
+- **Species categories**: none in v1, and the species list is alphabetical. Categories
+  are future work (#114).
+- **Pots**: a catalogue entry, not a unique object, and several bonsais can reference the
+  same pot. Each pot has a bought date that defaults to the date it was created. Unused-pot
+  tracking and quantities are future work (#115).
+
 ## Open Questions
-- Does renaming a bonsai rename its folder? Renaming keeps the vault readable in
-  Obsidian, but it breaks external links into it.
-- Session file naming when there are several sessions on one day (`-2`, `-3` suffix?).
-- Can a frozen age be entered in any unit (days, months, years), or only years?
-- Should the "last activity" filter work on any action, or on a chosen action type
-  (e.g. "not watered for 3 days")?
-- Species categories: fixed set (conifer, deciduous, broadleaf evergreen, tropical,
-  flowering/fruiting), or should they be a managed list too?
-- Pots: which fields (size, shape, colour, material, maker)? Is a pot a unique object
-  (moves between trees) or a catalogue model?
+- Birthday: can it be partial (year + month without a day)? If so, what day is assumed?
