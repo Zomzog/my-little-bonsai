@@ -15,7 +15,8 @@ interface FolderPickerLauncher {
  * Creates and remembers a [FolderPickerLauncher].
  *
  * On Android this registers an `ActivityResultLauncher` for `OpenDocumentTree`.
- * On Web this calls `window.showDirectoryPicker()`.
+ * On Web there is no picker — browser storage is always available, so this
+ * immediately calls [onGranted] and the folder-setup screen is never reached.
  * On JVM (tests) this immediately calls [onGranted].
  *
  * [onGranted] is invoked after the platform has persisted the folder reference and is safe to

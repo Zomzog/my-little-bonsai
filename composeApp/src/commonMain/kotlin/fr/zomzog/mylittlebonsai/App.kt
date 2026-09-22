@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import fr.zomzog.mylittlebonsai.data.InMemoryBonsaiRepository
+import fr.zomzog.mylittlebonsai.data.rememberBonsaiRepository
 import fr.zomzog.mylittlebonsai.domain.BonsaiRepository
 import fr.zomzog.mylittlebonsai.domain.FolderStorageManager
 import fr.zomzog.mylittlebonsai.ui.addbonsai.AddBonsaiScreen
@@ -35,7 +35,7 @@ fun App(
     repository: BonsaiRepository? = null,
     folderStorageManager: FolderStorageManager? = null,
 ) {
-    val effectiveRepository = remember { repository ?: InMemoryBonsaiRepository() }
+    val effectiveRepository = rememberBonsaiRepository(repository)
     val effectiveStorageManager = rememberFolderStorageManager(folderStorageManager)
     val colors = if (useDarkTheme) darkColorScheme() else lightColorScheme()
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
