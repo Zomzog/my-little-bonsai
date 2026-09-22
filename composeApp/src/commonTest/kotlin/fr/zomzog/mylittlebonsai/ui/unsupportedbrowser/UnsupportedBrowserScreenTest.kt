@@ -6,54 +6,47 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import mylittlebonsai.composeapp.generated.resources.Res
-import mylittlebonsai.composeapp.generated.resources.unsupported_browser_explanation
-import mylittlebonsai.composeapp.generated.resources.unsupported_browser_mobile_app_link
-import mylittlebonsai.composeapp.generated.resources.unsupported_browser_supported_body
-import mylittlebonsai.composeapp.generated.resources.unsupported_browser_title
-import org.jetbrains.compose.resources.stringResource
+
+// Compose resource strings load asynchronously on wasmJs (unlike the JVM test
+// target, where they resolve synchronously from the classpath), so these must
+// match `composeResources/values/strings.xml` literally rather than being
+// read back via stringResource() inside the test's own composition.
+private const val TITLE = "This browser isn't supported"
+private const val EXPLANATION =
+    "My Little Bonsai stores your data in a real folder on your device. That requires a " +
+        "browser feature (the File System Access API) that this browser does not provide."
+private const val SUPPORTED_BODY = "Chrome, Edge, and other Chromium-based desktop browsers."
+private const val MOBILE_APP_LINK = "Get the mobile app instead"
 
 @OptIn(ExperimentalTestApi::class)
 class UnsupportedBrowserScreenTest {
 
     @Test
     fun showsTitleExplanationAndSupportedBrowsers() = runComposeUiTest {
-        var title = ""
-        var explanation = ""
-        var supportedBrowsers = ""
-        setContent {
-            title = stringResource(Res.string.unsupported_browser_title)
-            explanation = stringResource(Res.string.unsupported_browser_explanation)
-            supportedBrowsers = stringResource(Res.string.unsupported_browser_supported_body)
-            UnsupportedBrowserScreen(onOpenMobileApp = {})
-        }
+        setContent { UnsupportedBrowserScreen(onOpenMobileApp = {}) }
+        waitForIdle()
 
-        onNodeWithText(title).assertExists()
-        onNodeWithText(explanation).assertExists()
-        onNodeWithText(supportedBrowsers).assertExists()
+        onNodeWithText(TITLE).assertExists()
+        onNodeWithText(EXPLANATION).assertExists()
+        onNodeWithText(SUPPORTED_BODY).assertExists()
     }
 
     @Test
     fun showsMobileAppLink() = runComposeUiTest {
-        var linkText = ""
-        setContent {
-            linkText = stringResource(Res.string.unsupported_browser_mobile_app_link)
-            UnsupportedBrowserScreen(onOpenMobileApp = {})
-        }
+        setContent { UnsupportedBrowserScreen(onOpenMobileApp = {}) }
+        waitForIdle()
 
-        onNodeWithText(linkText).assertExists()
+        onNodeWithText(MOBILE_APP_LINK).assertExists()
     }
 
     @Test
     fun clickingMobileAppLinkInvokesCallback() = runComposeUiTest {
-        var linkText = ""
         var clicked = false
-        setContent {
-            linkText = stringResource(Res.string.unsupported_browser_mobile_app_link)
-            UnsupportedBrowserScreen(onOpenMobileApp = { clicked = true })
-        }
+        setContent { UnsupportedBrowserScreen(onOpenMobileApp = { clicked = true }) }
+        waitForIdle()
 
-        onNodeWithText(linkText).performClick()
+        onNodeWithText(MOBILE_APP_LINK).performClick()
+        waitForIdle()
         assertTrue(clicked)
     }
 }
