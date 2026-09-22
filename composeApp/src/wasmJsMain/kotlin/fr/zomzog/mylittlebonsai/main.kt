@@ -11,9 +11,6 @@ import kotlinx.browser.document
 @JsFun("() => 'showDirectoryPicker' in window")
 private external fun isFileSystemAccessSupported(): Boolean
 
-@JsFun("() => navigator.language")
-private external fun browserLanguage(): String
-
 @JsFun("(url) => { window.open(url, '_blank') }")
 private external fun openInNewTab(url: String)
 
@@ -24,7 +21,6 @@ fun main() {
             App()
         } else {
             UnsupportedBrowserScreen(
-                languageTag = browserLanguage(),
                 onOpenMobileApp = { openInNewTab(UNSUPPORTED_BROWSER_MOBILE_APP_URL) },
             )
         }

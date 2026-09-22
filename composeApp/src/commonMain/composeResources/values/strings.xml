@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unsupported_browser_title">This browser isn\'t supported</string>
+    <string name="unsupported_browser_explanation">My Little Bonsai stores your data in a real folder on your device. That requires a browser feature (the File System Access API) that this browser does not provide.</string>
+    <string name="unsupported_browser_supported_heading">Supported browsers</string>
+    <string name="unsupported_browser_supported_body">Chrome, Edge, and other Chromium-based desktop browsers.</string>
+    <string name="unsupported_browser_mobile_app_link">Get the mobile app instead</string>
+</resources>

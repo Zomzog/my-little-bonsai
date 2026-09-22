@@ -28,14 +28,19 @@ the File System Access vault repository behind it is tracked separately in
 - The mobile app link is a placeholder (`https://www.youtube.com/watch?v=dQw4w9WgXcQ`)
   until the app is published ([#15](https://github.com/Zomzog/my-little-bonsai/issues/15));
   replacing it is tracked in Future work.
-- The page is bilingual: `navigator.language` picks between English and French strings
-  (`UnsupportedBrowserScreen.kt`, `commonMain`), falling back to English for any other tag.
+- The page is bilingual (English/French) via real Compose Multiplatform string
+  resources: `composeResources/values/strings.xml` (default/English) and
+  `composeResources/values-fr/strings.xml` (French). `stringResource(...)` picks the
+  variant matching the platform locale automatically — no manual `navigator.language`
+  detection needed. This is the project's first use of string resources (previously
+  every screen's text was a hardcoded English `const val`); `FolderSetupScreen`'s
+  strings are a natural next candidate to migrate onto the same mechanism.
 
 ### Shared
 - `UnsupportedBrowserScreen`/`UnsupportedBrowserContent` live in `commonMain` so the
   stateless content composable can be unit-tested like the rest of the app's screens
-  (`FolderSetupScreen` is the template followed). Android is unaffected — SAF is
-  available on every Android version the app targets, so the gate is wired up in
+  (`FolderSetupScreen` is the template followed for structure). Android is unaffected —
+  SAF is available on every Android version the app targets, so the gate is wired up in
   `wasmJsMain/main.kt` only.
 
 ### Platform differences (revised)

@@ -6,41 +6,54 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import mylittlebonsai.composeapp.generated.resources.Res
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_explanation
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_mobile_app_link
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_supported_body
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_title
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalTestApi::class)
 class UnsupportedBrowserScreenTest {
 
     @Test
-    fun englishLanguageTagShowsEnglishText() = runComposeUiTest {
-        setContent { UnsupportedBrowserScreen(languageTag = "en-US", onOpenMobileApp = {}) }
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_EN.title).assertExists()
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_EN.explanation).assertExists()
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_EN.supportedBrowsersBody).assertExists()
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_EN.mobileAppLink).assertExists()
+    fun showsTitleExplanationAndSupportedBrowsers() = runComposeUiTest {
+        var title = ""
+        var explanation = ""
+        var supportedBrowsers = ""
+        setContent {
+            title = stringResource(Res.string.unsupported_browser_title)
+            explanation = stringResource(Res.string.unsupported_browser_explanation)
+            supportedBrowsers = stringResource(Res.string.unsupported_browser_supported_body)
+            UnsupportedBrowserScreen(onOpenMobileApp = {})
+        }
+
+        onNodeWithText(title).assertExists()
+        onNodeWithText(explanation).assertExists()
+        onNodeWithText(supportedBrowsers).assertExists()
     }
 
     @Test
-    fun frenchLanguageTagShowsFrenchText() = runComposeUiTest {
-        setContent { UnsupportedBrowserScreen(languageTag = "fr-FR", onOpenMobileApp = {}) }
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_FR.title).assertExists()
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_FR.explanation).assertExists()
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_FR.supportedBrowsersBody).assertExists()
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_FR.mobileAppLink).assertExists()
-    }
+    fun showsMobileAppLink() = runComposeUiTest {
+        var linkText = ""
+        setContent {
+            linkText = stringResource(Res.string.unsupported_browser_mobile_app_link)
+            UnsupportedBrowserScreen(onOpenMobileApp = {})
+        }
 
-    @Test
-    fun unknownLanguageTagFallsBackToEnglish() = runComposeUiTest {
-        setContent { UnsupportedBrowserScreen(languageTag = "de-DE", onOpenMobileApp = {}) }
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_EN.title).assertExists()
+        onNodeWithText(linkText).assertExists()
     }
 
     @Test
     fun clickingMobileAppLinkInvokesCallback() = runComposeUiTest {
+        var linkText = ""
         var clicked = false
         setContent {
-            UnsupportedBrowserScreen(languageTag = "en-US", onOpenMobileApp = { clicked = true })
+            linkText = stringResource(Res.string.unsupported_browser_mobile_app_link)
+            UnsupportedBrowserScreen(onOpenMobileApp = { clicked = true })
         }
-        onNodeWithText(UNSUPPORTED_BROWSER_STRINGS_EN.mobileAppLink).performClick()
+
+        onNodeWithText(linkText).performClick()
         assertTrue(clicked)
     }
 }

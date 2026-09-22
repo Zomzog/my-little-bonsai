@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unsupported_browser_title">Ce navigateur n\'est pas pris en charge</string>
+    <string name="unsupported_browser_explanation">My Little Bonsai enregistre vos données dans un vrai dossier sur votre appareil. Cela nécessite une fonctionnalité du navigateur (la File System Access API) que ce navigateur ne propose pas.</string>
+    <string name="unsupported_browser_supported_heading">Navigateurs pris en charge</string>
+    <string name="unsupported_browser_supported_body">Chrome, Edge et les autres navigateurs de bureau basés sur Chromium.</string>
+    <string name="unsupported_browser_mobile_app_link">Utiliser l\'application mobile à la place</string>
+</resources>

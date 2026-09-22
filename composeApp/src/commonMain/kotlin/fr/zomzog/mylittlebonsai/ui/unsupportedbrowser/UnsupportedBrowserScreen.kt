@@ -15,60 +15,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import mylittlebonsai.composeapp.generated.resources.Res
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_explanation
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_mobile_app_link
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_supported_body
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_supported_heading
+import mylittlebonsai.composeapp.generated.resources.unsupported_browser_title
+import org.jetbrains.compose.resources.stringResource
 
 const val UNSUPPORTED_BROWSER_MOBILE_APP_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-internal data class UnsupportedBrowserStrings(
-    val title: String,
-    val explanation: String,
-    val supportedBrowsersHeading: String,
-    val supportedBrowsersBody: String,
-    val mobileAppLink: String,
-)
-
-internal val UNSUPPORTED_BROWSER_STRINGS_EN = UnsupportedBrowserStrings(
-    title = "This browser isn't supported",
-    explanation = "My Little Bonsai stores your data in a real folder on your device. " +
-        "That requires a browser feature (the File System Access API) that this browser " +
-        "does not provide.",
-    supportedBrowsersHeading = "Supported browsers",
-    supportedBrowsersBody = "Chrome, Edge, and other Chromium-based desktop browsers.",
-    mobileAppLink = "Get the mobile app instead",
-)
-
-internal val UNSUPPORTED_BROWSER_STRINGS_FR = UnsupportedBrowserStrings(
-    title = "Ce navigateur n'est pas pris en charge",
-    explanation = "My Little Bonsai enregistre vos données dans un vrai dossier sur votre " +
-        "appareil. Cela nécessite une fonctionnalité du navigateur (la File System Access " +
-        "API) que ce navigateur ne propose pas.",
-    supportedBrowsersHeading = "Navigateurs pris en charge",
-    supportedBrowsersBody = "Chrome, Edge et les autres navigateurs de bureau basés sur Chromium.",
-    mobileAppLink = "Utiliser l'application mobile à la place",
-)
-
-internal fun unsupportedBrowserStrings(languageTag: String): UnsupportedBrowserStrings =
-    if (languageTag.startsWith("fr", ignoreCase = true)) {
-        UNSUPPORTED_BROWSER_STRINGS_FR
-    } else {
-        UNSUPPORTED_BROWSER_STRINGS_EN
-    }
-
 @Composable
 fun UnsupportedBrowserScreen(
-    languageTag: String,
     onOpenMobileApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    UnsupportedBrowserContent(
-        strings = unsupportedBrowserStrings(languageTag),
-        onOpenMobileApp = onOpenMobileApp,
-        modifier = modifier,
-    )
+    UnsupportedBrowserContent(onOpenMobileApp = onOpenMobileApp, modifier = modifier)
 }
 
 @Composable
 internal fun UnsupportedBrowserContent(
-    strings: UnsupportedBrowserStrings,
     onOpenMobileApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -80,7 +46,7 @@ internal fun UnsupportedBrowserContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = strings.title,
+            text = stringResource(Res.string.unsupported_browser_title),
             style = MaterialTheme.typography.headlineMedium,
         )
 
@@ -89,17 +55,17 @@ internal fun UnsupportedBrowserContent(
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = strings.explanation,
+                    text = stringResource(Res.string.unsupported_browser_explanation),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = strings.supportedBrowsersHeading,
+                    text = stringResource(Res.string.unsupported_browser_supported_heading),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = strings.supportedBrowsersBody,
+                    text = stringResource(Res.string.unsupported_browser_supported_body),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -108,7 +74,7 @@ internal fun UnsupportedBrowserContent(
         Spacer(Modifier.height(24.dp))
 
         TextButton(onClick = onOpenMobileApp) {
-            Text(strings.mobileAppLink)
+            Text(stringResource(Res.string.unsupported_browser_mobile_app_link))
         }
     }
 }
