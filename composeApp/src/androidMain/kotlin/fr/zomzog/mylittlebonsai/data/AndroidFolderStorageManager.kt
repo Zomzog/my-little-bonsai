@@ -48,6 +48,9 @@ class AndroidFolderStorageManager(private val context: Context) : FolderStorageM
         prefs.edit().putString(KEY_FOLDER_URI, uri.toString()).apply()
     }
 
+    /** The persisted vault root, once a folder has been chosen; `null` before onboarding. */
+    fun folderUri(): Uri? = prefs.getString(KEY_FOLDER_URI, null)?.let(Uri::parse)
+
     override suspend fun createMetadataFile() = withContext(Dispatchers.IO) {
         val uriString = prefs.getString(KEY_FOLDER_URI, null) ?: return@withContext
         val treeUri = Uri.parse(uriString)

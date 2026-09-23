@@ -11,31 +11,15 @@ class ValidateTest {
 
     private fun state(
         name: String = "Akira",
-        kind: String = "Maple",
-        purchaseDate: LocalDate? = LocalDate(2024, 3, 10),
-        lastMaintenance: LocalDate? = null,
-    ) = AddBonsaiFormState(
-        name = name,
-        kind = kind,
-        purchaseDate = purchaseDate,
-        lastMaintenanceDate = lastMaintenance,
-    )
+        addedOn: LocalDate? = LocalDate(2024, 3, 10),
+    ) = AddBonsaiFormState(name = name, addedOn = addedOn)
 
     @Test
     fun validFormReturnsBonsai() {
         val result = validate(state())
         assertThat(result.bonsai).isNotNull()
         assertThat(result.bonsai!!.name).isEqualTo("Akira")
-        assertThat(result.bonsai.kind).isEqualTo("Maple")
-        assertThat(result.bonsai.purchaseDate).isEqualTo(LocalDate(2024, 3, 10))
-        assertThat(result.bonsai.lastMaintenanceDate).isNull()
-    }
-
-    @Test
-    fun validFormWithMaintenanceDateReturnsBonsai() {
-        val result = validate(state(lastMaintenance = LocalDate(2025, 1, 20)))
-        assertThat(result.bonsai).isNotNull()
-        assertThat(result.bonsai!!.lastMaintenanceDate).isEqualTo(LocalDate(2025, 1, 20))
+        assertThat(result.bonsai.addedOn).isEqualTo(LocalDate(2024, 3, 10))
     }
 
     @Test
@@ -48,51 +32,35 @@ class ValidateTest {
     @Test
     fun blankNameDoesNotAffectOtherErrors() {
         val result = validate(state(name = ""))
-        assertThat(result.updatedState.kindError).isNull()
-        assertThat(result.updatedState.purchaseDateError).isNull()
+        assertThat(result.updatedState.addedOnError).isNull()
     }
 
     @Test
-    fun blankKindSetsKindError() {
-        val result = validate(state(kind = ""))
+    fun nullAddedOnSetsDateError() {
+        val result = validate(state(addedOn = null))
         assertThat(result.bonsai).isNull()
-        assertThat(result.updatedState.kindError).isEqualTo(ERROR_KIND_BLANK)
-    }
-
-    @Test
-    fun nullPurchaseDateSetsDateError() {
-        val result = validate(state(purchaseDate = null))
-        assertThat(result.bonsai).isNull()
-        assertThat(result.updatedState.purchaseDateError).isEqualTo(ERROR_PURCHASE_DATE_REQUIRED)
-    }
-
-    @Test
-    fun nullMaintenanceDateIsAccepted() {
-        val result = validate(state(lastMaintenance = null))
-        assertThat(result.bonsai).isNotNull()
+        assertThat(result.updatedState.addedOnError).isEqualTo(ERROR_ADDED_ON_REQUIRED)
     }
 
     @Test
     fun multipleErrorsAreAllReported() {
-        val result = validate(state(name = "", kind = "", purchaseDate = null))
+        val result = validate(state(name = "", addedOn = null))
         assertThat(result.bonsai).isNull()
         assertThat(result.updatedState.nameError).isNotNull()
-        assertThat(result.updatedState.kindError).isNotNull()
-        assertThat(result.updatedState.purchaseDateError).isNotNull()
+        assertThat(result.updatedState.addedOnError).isNotNull()
     }
 
     @Test
     fun validationClearsPreviousErrors() {
         val dirtyState = AddBonsaiFormState(
             name = "Akira",
-            kind = "Maple",
-            purchaseDate = LocalDate(2024, 3, 10),
+            addedOn = LocalDate(2024, 3, 10),
             nameError = "stale error",
-            kindError = "stale error",
+            addedOnError = "stale error",
         )
         val result = validate(dirtyState)
         assertThat(result.bonsai).isNotNull()
         assertThat(result.updatedState.nameError).isNull()
-        assertThat(result.updatedState.kindError).isNull()
+        assertThat(result.updatedState.addedOnError).isNull()
     }
 }

@@ -11,48 +11,40 @@ class BonsaiTest {
 
     private val date = LocalDate(2024, 3, 10)
 
+    private fun bonsai(id: String = "1", name: String = "Akira") = Bonsai(id = id, name = name, addedOn = date)
+
     @Test
     fun bonsaiEqualityHoldsForIdenticalFields() {
-        val a = Bonsai("1", "Akira", "Maple", date)
-        val b = Bonsai("1", "Akira", "Maple", date)
-        assertThat(a).isEqualTo(b)
+        assertThat(bonsai()).isEqualTo(bonsai())
     }
 
     @Test
     fun bonsaiInequalityOnDifferentId() {
-        val a = Bonsai("1", "Akira", "Maple", date)
-        val b = Bonsai("2", "Akira", "Maple", date)
-        assertThat(a).isNotEqualTo(b)
+        assertThat(bonsai(id = "1")).isNotEqualTo(bonsai(id = "2"))
     }
 
     @Test
     fun bonsaiHashCodeConsistentWithEquals() {
-        val a = Bonsai("1", "Akira", "Maple", date)
-        val b = Bonsai("1", "Akira", "Maple", date)
-        assertThat(a.hashCode()).isEqualTo(b.hashCode())
+        assertThat(bonsai().hashCode()).isEqualTo(bonsai().hashCode())
     }
 
     @Test
     fun bonsaiToStringContainsName() {
-        val bonsai = Bonsai("1", "Akira", "Maple", date)
-        assertThat(bonsai.toString().contains("Akira")).isTrue()
+        assertThat(bonsai().toString().contains("Akira")).isTrue()
     }
 
     @Test
     fun bonsaiCopyPreservesUnchangedFields() {
-        val original = Bonsai("1", "Akira", "Maple", date)
+        val original = bonsai()
         val copy = original.copy(name = "Bonsuke")
         assertThat(copy.id).isEqualTo("1")
         assertThat(copy.name).isEqualTo("Bonsuke")
-        assertThat(copy.kind).isEqualTo("Maple")
-        assertThat(copy.purchaseDate).isEqualTo(date)
+        assertThat(copy.addedOn).isEqualTo(date)
     }
 
     @Test
-    fun bonsaiCopyWithLastMaintenanceDate() {
-        val maintenance = LocalDate(2025, 1, 5)
-        val original = Bonsai("1", "Akira", "Maple", date)
-        val copy = original.copy(lastMaintenanceDate = maintenance)
-        assertThat(copy.lastMaintenanceDate).isEqualTo(maintenance)
+    fun defaultStatusIsActiveWithNoOptionalFields() {
+        val bonsai = bonsai()
+        assertThat(bonsai.status).isEqualTo(BonsaiStatus.ACTIVE)
     }
 }

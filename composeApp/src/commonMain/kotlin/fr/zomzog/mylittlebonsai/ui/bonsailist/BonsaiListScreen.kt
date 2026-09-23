@@ -79,11 +79,7 @@ private fun BonsaiCard(bonsai: Bonsai, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(bonsai.name, style = MaterialTheme.typography.titleMedium)
-            Text(bonsai.kind, style = MaterialTheme.typography.bodyMedium)
-            Text(bonsai.purchaseDate.toString(), style = MaterialTheme.typography.bodySmall)
-            bonsai.lastMaintenanceDate?.let { date ->
-                Text(date.toString(), style = MaterialTheme.typography.bodySmall)
-            }
+            Text(bonsai.addedOn.toString(), style = MaterialTheme.typography.bodySmall)
         }
     }
 }
