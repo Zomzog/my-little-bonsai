@@ -60,4 +60,13 @@ class VaultTimestampTest {
         val parsed = VaultTimestamp.parse("2026-04-12T10:35:12+02:00")
         assertThat(parsed.dateTime).isEqualTo(LocalDateTime(2026, 4, 12, 10, 35, 12))
     }
+
+    @Test
+    fun equalityHashCodeAndCopy() {
+        val a = VaultTimestamp(LocalDateTime(2026, 4, 12, 10, 35, 12), 7200)
+        val b = VaultTimestamp(LocalDateTime(2026, 4, 12, 10, 35, 12), 7200)
+        assertThat(a).isEqualTo(b)
+        assertThat(a.hashCode()).isEqualTo(b.hashCode())
+        assertThat(a.copy(utcOffsetSeconds = 0).utcOffsetSeconds).isEqualTo(0)
+    }
 }
