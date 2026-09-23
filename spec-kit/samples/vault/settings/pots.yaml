@@ -1,0 +1,11 @@
+added:
+  - id: 5b2d9c77-1a4e-4f0b-b3d8-6e9f0a1c2d34
+    name: Tokoname ovale 30 cm
+    boughtOn: 2026-03-20
+    dimensions:
+      length: 30
+      width: 22
+      depth: 7
+  - id: e4c8a1f2-3b5d-4a79-9c06-1d2e3f4a5b6c
+    name: Pot d'entraînement 25 cm
+    boughtOn: 2024-03-02

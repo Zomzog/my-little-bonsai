@@ -59,7 +59,7 @@ work starts on it, as `.claude/CLAUDE.md` requires.
 
 ## Design (functional)
 
-### Vault layout (target, detailed in the Vault format spec)
+### Vault layout (target, detailed in the [Vault format spec](vault-format.md))
 
 ```
 <vault>/
