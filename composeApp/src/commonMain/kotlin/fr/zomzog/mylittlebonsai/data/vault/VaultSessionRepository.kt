@@ -16,7 +16,8 @@ import kotlinx.coroutines.sync.withLock
 private val sessionOrder = compareBy<Session>({ it.date }, { it.createdAt.toString() })
 
 /**
- * [SessionRepository] backed by `bonsais/<slug>/sessions/*.md` files in a [VaultFileSystem].
+ * [SessionRepository] backed by session files (`*.md`) under `bonsais/<slug>/sessions/` in a
+ * [VaultFileSystem].
  *
  * Depends on [bonsaiRepository] to resolve a bonsai id to its vault folder, and to apply
  * the vault format's rule that the latest repotting session's substrate/pot are copied
