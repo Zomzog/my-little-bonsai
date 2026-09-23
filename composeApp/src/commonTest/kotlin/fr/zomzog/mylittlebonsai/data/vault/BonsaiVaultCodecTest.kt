@@ -150,4 +150,62 @@ class BonsaiVaultCodecTest {
                 "archived:\n  reason: exploded\n  date: 2026-01-01\n---\n"
         assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
     }
+
+    @Test
+    fun decodeThrowsWhenNameIsMissing() {
+        val text = "---\nid: 1\nstatus: active\naddedOn: 2024-03-02\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenStatusIsMissing() {
+        val text = "---\nid: 1\nname: Akira\naddedOn: 2024-03-02\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenAddedOnIsMissing() {
+        val text = "---\nid: 1\nname: Akira\nstatus: active\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenArchivedIsMissingReason() {
+        val text =
+            "---\nid: 1\nname: Akira\nstatus: archived\naddedOn: 2024-03-02\n" +
+                "archived:\n  date: 2026-01-01\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenArchivedIsMissingDate() {
+        val text =
+            "---\nid: 1\nname: Akira\nstatus: archived\naddedOn: 2024-03-02\n" +
+                "archived:\n  reason: dead\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenSubstrateComponentIsNotAMapping() {
+        val text =
+            "---\nid: 1\nname: Akira\nstatus: active\naddedOn: 2024-03-02\n" +
+                "substrate:\n  components:\n    - akadama\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenSubstrateComponentIsMissingSoil() {
+        val text =
+            "---\nid: 1\nname: Akira\nstatus: active\naddedOn: 2024-03-02\n" +
+                "substrate:\n  components:\n    - percent: 100\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenSubstrateComponentIsMissingPercent() {
+        val text =
+            "---\nid: 1\nname: Akira\nstatus: active\naddedOn: 2024-03-02\n" +
+                "substrate:\n  components:\n    - soil: akadama\n---\n"
+        assertThat(runCatching { BonsaiVaultCodec.decode(text) }).isFailure()
+    }
 }

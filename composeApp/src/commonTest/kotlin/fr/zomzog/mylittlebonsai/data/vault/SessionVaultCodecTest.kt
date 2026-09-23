@@ -174,6 +174,42 @@ class SessionVaultCodecTest {
     }
 
     @Test
+    fun decodeThrowsWhenDateIsMissing() {
+        val text = "---\nid: 1\ncreatedAt: 2026-04-12T10:35:12Z\nactions:\n  - action: pruning\n---\n"
+        assertThat(runCatching { SessionVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenCreatedAtIsMissing() {
+        val text = "---\nid: 1\ndate: 2026-04-12\nactions:\n  - action: pruning\n---\n"
+        assertThat(runCatching { SessionVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenAnActionItemIsMissingTheActionKey() {
+        val text =
+            "---\nid: 1\ndate: 2026-04-12\ncreatedAt: 2026-04-12T10:35:12Z\n" +
+                "actions:\n  - note: hello\n---\n"
+        assertThat(runCatching { SessionVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenDoseIsMissingAmount() {
+        val text =
+            "---\nid: 1\ndate: 2026-04-12\ncreatedAt: 2026-04-12T10:35:12Z\n" +
+                "actions:\n  - action: fertilizing\n    fertilizer: x\n    dose:\n      unit: g\n---\n"
+        assertThat(runCatching { SessionVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
+    fun decodeThrowsWhenDoseIsMissingUnit() {
+        val text =
+            "---\nid: 1\ndate: 2026-04-12\ncreatedAt: 2026-04-12T10:35:12Z\n" +
+                "actions:\n  - action: fertilizing\n    fertilizer: x\n    dose:\n      amount: 1\n---\n"
+        assertThat(runCatching { SessionVaultCodec.decode(text) }).isFailure()
+    }
+
+    @Test
     fun decodesUnknownActionAsOtherWithItsId() {
         val text =
             "---\nid: 1\ndate: 2026-04-12\ncreatedAt: 2026-04-12T10:35:12Z\n" +

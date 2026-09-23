@@ -120,4 +120,29 @@ class MiniYamlTest {
     fun throwsWhenTopLevelIsASequence() {
         assertThat(runCatching { parseYaml("- one\n- two") }).isFailure()
     }
+
+    @Test
+    fun parsesBareDashItemWithANestedMapping() {
+        val text = "items:\n  -\n    id: 1\n    name: Akira"
+        val yaml = parseYaml(text)
+        val item = yaml.sequence("items")!!.items[0] as YamlNode.Mapping
+        assertThat(item.string("id")).isEqualTo("1")
+        assertThat(item.string("name")).isEqualTo("Akira")
+    }
+
+    @Test
+    fun parsesBareDashItemWithNoContentAsNullScalar() {
+        val text = "items:\n  -\nother: x"
+        val yaml = parseYaml(text)
+        assertThat(yaml.sequence("items")!!.items[0]).isEqualTo(YamlNode.Scalar(null))
+        assertThat(yaml.string("other")).isEqualTo("x")
+    }
+
+    @Test
+    fun parsesDashMappingWhoseFirstKeyHasANestedBlock() {
+        val text = "actions:\n  - substrate:\n      mix: abc"
+        val yaml = parseYaml(text)
+        val item = yaml.sequence("actions")!!.items[0] as YamlNode.Mapping
+        assertThat(item.mapping("substrate")?.string("mix")).isEqualTo("abc")
+    }
 }
