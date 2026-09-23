@@ -108,3 +108,47 @@ kover {
         }
     }
 }
+
+// TEMPORARY diagnostic: prints per-class missed-line counts from the Kover XML report
+// to the CI console, since the XML artifact itself isn't reachable from this session.
+// Remove once coverage is back above the gate.
+tasks.register("koverPrintWorstFiles") {
+    dependsOn("koverXmlReport")
+    doLast {
+        val reportFile = file("build/reports/kover/report.xml")
+        if (!reportFile.exists()) {
+            println("KOVER_DIAG: report not found at $reportFile")
+            return@doLast
+        }
+        val factory = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+        factory.setFeature("http://xml.org/sax/features/validation", false)
+        val doc = factory.newDocumentBuilder().parse(reportFile)
+        val classNodes = doc.getElementsByTagName("class")
+        val results = mutableListOf<Triple<String, Int, Int>>()
+        for (i in 0 until classNodes.length) {
+            val classEl = classNodes.item(i) as org.w3c.dom.Element
+            val name = classEl.getAttribute("name")
+            val counters = classEl.getElementsByTagName("counter")
+            var missed = 0
+            var covered = 0
+            for (j in 0 until counters.length) {
+                val counterEl = counters.item(j) as org.w3c.dom.Element
+                if (counterEl.getAttribute("type") == "LINE") {
+                    missed = counterEl.getAttribute("missed").toInt()
+                    covered = counterEl.getAttribute("covered").toInt()
+                }
+            }
+            if (missed > 0) results += Triple(name, missed, covered)
+        }
+        println("KOVER_DIAG_START")
+        results.sortedByDescending { it.second }.forEach { (name, missed, covered) ->
+            println("KOVER_DIAG missed=$missed covered=$covered class=$name")
+        }
+        println("KOVER_DIAG_END")
+    }
+}
+
+tasks.named("koverXmlReport") {
+    finalizedBy("koverPrintWorstFiles")
+}
