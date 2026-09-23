@@ -1,0 +1,10 @@
+added:
+  - id: 6a3f9e1d-2c4b-4d8a-b7e5-0f1a2b3c4d5e
+    name: Akadama / pumice / lava
+    components:
+      - soil: akadama
+        percent: 50
+      - soil: pumice
+        percent: 25
+      - soil: lava-rock
+        percent: 25
