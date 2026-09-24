@@ -5,6 +5,7 @@ import assertk.assertions.containsExactly
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import fr.zomzog.mylittlebonsai.domain.Bonsai
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -13,19 +14,8 @@ import kotlin.test.Test
 
 class StoredBonsaiRepositoryTest {
 
-    private val bonsaiA = Bonsai(
-        id = "id-a",
-        name = "Akira",
-        kind = "Maple",
-        purchaseDate = LocalDate(2024, 3, 10),
-    )
-    private val bonsaiB = Bonsai(
-        id = "id-b",
-        name = "Bonsuke",
-        kind = "Pine",
-        purchaseDate = LocalDate(2023, 7, 1),
-        lastMaintenanceDate = LocalDate(2024, 1, 15),
-    )
+    private val bonsaiA = Bonsai(id = "id-a", name = "Akira", addedOn = LocalDate(2024, 3, 10))
+    private val bonsaiB = Bonsai(id = "id-b", name = "Bonsuke", addedOn = LocalDate(2023, 7, 1))
 
     @Test
     fun streamIsEmptyWhenStoreHasNoEntry() = runTest {
@@ -97,5 +87,30 @@ class StoredBonsaiRepositoryTest {
         val store = FakeKeyValueStore()
         StoredBonsaiRepository(store, key = "custom.key").addBonsai(bonsaiA)
         assertThat(store.read("custom.key")).isNotNull()
+    }
+
+    @Test
+    fun getBonsaiReturnsNullForUnknownId() = runTest {
+        assertThat(StoredBonsaiRepository(FakeKeyValueStore()).getBonsai("missing")).isNull()
+    }
+
+    @Test
+    fun getBonsaiFindsAnAddedBonsai() = runTest {
+        val repository = StoredBonsaiRepository(FakeKeyValueStore())
+        repository.addBonsai(bonsaiA)
+        assertThat(repository.getBonsai("id-a")).isEqualTo(bonsaiA)
+    }
+
+    @Test
+    fun updateBonsaiRewritesTheEntryAndPersists() = runTest {
+        val store = FakeKeyValueStore()
+        val repository = StoredBonsaiRepository(store)
+        repository.addBonsai(bonsaiA)
+
+        val updated = bonsaiA.copy(name = "Akira Renamed")
+        repository.updateBonsai(updated)
+
+        assertThat(repository.getBonsaisStream().first()).containsExactly(updated)
+        assertThat(StoredBonsaiRepository(store).getBonsaisStream().first()).containsExactly(updated)
     }
 }
