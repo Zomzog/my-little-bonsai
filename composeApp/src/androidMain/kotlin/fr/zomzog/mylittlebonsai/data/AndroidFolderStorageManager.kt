@@ -28,9 +28,11 @@ class AndroidFolderStorageManager(private val context: Context) : FolderStorageM
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
+    private val persistedUri: Uri?
+        get() = prefs.getString(KEY_FOLDER_URI, null)?.let(Uri::parse)
+
     override suspend fun hasStorageAccess(): Boolean = withContext(Dispatchers.IO) {
-        val uriString = prefs.getString(KEY_FOLDER_URI, null) ?: return@withContext false
-        val uri = Uri.parse(uriString)
+        val uri = persistedUri ?: return@withContext false
         context.contentResolver.persistedUriPermissions.any { permission ->
             permission.uri == uri && permission.isReadPermission && permission.isWritePermission
         }
@@ -48,12 +50,17 @@ class AndroidFolderStorageManager(private val context: Context) : FolderStorageM
         prefs.edit().putString(KEY_FOLDER_URI, uri.toString()).apply()
     }
 
-    /** The persisted vault root, once a folder has been chosen; `null` before onboarding. */
-    fun folderUri(): Uri? = prefs.getString(KEY_FOLDER_URI, null)?.let(Uri::parse)
+    /**
+     * The vault root chosen during onboarding. Callers must only use this once
+     * [hasStorageAccess] (or the app's navigation gate) has confirmed a folder is set;
+     * it throws otherwise rather than silently falling back to no storage.
+     */
+    fun folderUri(): Uri = checkNotNull(persistedUri) {
+        "folderUri() called before onboarding granted storage access"
+    }
 
     override suspend fun createMetadataFile() = withContext(Dispatchers.IO) {
-        val uriString = prefs.getString(KEY_FOLDER_URI, null) ?: return@withContext
-        val treeUri = Uri.parse(uriString)
+        val treeUri = persistedUri ?: return@withContext
         val docId = DocumentsContract.getTreeDocumentId(treeUri)
         val baseDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
 

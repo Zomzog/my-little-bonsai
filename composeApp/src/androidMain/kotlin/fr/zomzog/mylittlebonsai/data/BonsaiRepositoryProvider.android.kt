@@ -8,16 +8,16 @@ import fr.zomzog.mylittlebonsai.data.vault.VaultBonsaiRepository
 import fr.zomzog.mylittlebonsai.domain.BonsaiRepository
 
 /**
- * Uses the vault at the folder the user picked during onboarding ([AndroidFolderStorageManager]),
- * or an in-memory repository when reached before onboarding (there is no screen that does,
- * since [fr.zomzog.mylittlebonsai.App]'s navigation gate requires storage access first).
+ * Uses the vault at the folder the user picked during onboarding ([AndroidFolderStorageManager]).
+ * [fr.zomzog.mylittlebonsai.App]'s navigation gate only composes a screen that calls this once
+ * storage access is confirmed, so [AndroidFolderStorageManager.folderUri] is trusted to be set.
  */
 @Composable
 actual fun rememberBonsaiRepository(provided: BonsaiRepository?): BonsaiRepository {
     val context = LocalContext.current
     return remember {
-        provided ?: AndroidFolderStorageManager(context).folderUri()?.let { treeUri ->
-            VaultBonsaiRepository(SafVaultFileSystem(context, treeUri))
-        } ?: InMemoryBonsaiRepository()
+        provided ?: VaultBonsaiRepository(
+            SafVaultFileSystem(context, AndroidFolderStorageManager(context).folderUri()),
+        )
     }
 }
