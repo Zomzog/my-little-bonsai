@@ -30,6 +30,14 @@ class StoredBonsaiRepository(
         store.write(key, BonsaiSerialization.encode(updated))
     }
 
+    override suspend fun getBonsai(id: String): Bonsai? = bonsais.value.find { it.id == id }
+
+    override suspend fun updateBonsai(bonsai: Bonsai) {
+        val updated = bonsais.value.map { if (it.id == bonsai.id) bonsai else it }
+        bonsais.value = updated
+        store.write(key, BonsaiSerialization.encode(updated))
+    }
+
     private fun load(): List<Bonsai> =
         store.read(key)?.let(BonsaiSerialization::decode) ?: emptyList()
 }

@@ -16,6 +16,9 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class BonsaiListScreenTest {
 
+    private fun bonsai(id: String, name: String, addedOn: LocalDate = LocalDate(2024, 3, 10)) =
+        Bonsai(id = id, name = name, addedOn = addedOn)
+
     @Test
     fun emptyRepositoryShowsEmptyState() = runComposeUiTest {
         setContent {
@@ -34,45 +37,22 @@ class BonsaiListScreenTest {
 
     @Test
     fun repositoryWithBonsaiShowsCardName() = runComposeUiTest {
-        val repo = InMemoryBonsaiRepository(listOf(Bonsai("1", "Akira", "Maple", LocalDate(2024, 3, 10))))
+        val repo = InMemoryBonsaiRepository(listOf(bonsai("1", "Akira")))
         setContent { BonsaiListScreen(repository = repo, onNavigateToAdd = {}) }
         onNodeWithText("Akira").assertExists()
     }
 
     @Test
-    fun cardShowsKindAndPurchaseDate() = runComposeUiTest {
-        val repo = InMemoryBonsaiRepository(listOf(Bonsai("1", "Akira", "Maple", LocalDate(2024, 3, 10))))
+    fun cardShowsAddedOnDate() = runComposeUiTest {
+        val repo = InMemoryBonsaiRepository(listOf(bonsai("1", "Akira")))
         setContent { BonsaiListScreen(repository = repo, onNavigateToAdd = {}) }
-        onNodeWithText("Maple").assertExists()
         onNodeWithText("2024-03-10").assertExists()
-    }
-
-    @Test
-    fun cardShowsLastMaintenanceDateWhenPresent() = runComposeUiTest {
-        val repo = InMemoryBonsaiRepository(
-            listOf(Bonsai("1", "Akira", "Maple", LocalDate(2024, 3, 10), LocalDate(2025, 1, 5))),
-        )
-        setContent { BonsaiListScreen(repository = repo, onNavigateToAdd = {}) }
-        onNodeWithText("2025-01-05").assertExists()
-    }
-
-    @Test
-    fun cardWithNullMaintenanceDateDoesNotShowIt() = runComposeUiTest {
-        val repo = InMemoryBonsaiRepository(
-            listOf(Bonsai("1", "Akira", "Maple", LocalDate(2024, 3, 10), lastMaintenanceDate = null)),
-        )
-        setContent { BonsaiListScreen(repository = repo, onNavigateToAdd = {}) }
-        onNodeWithText("Akira").assertExists()
-        onAllNodesWithText(EMPTY_LIST_MESSAGE).assertCountEquals(0)
     }
 
     @Test
     fun multipleBonsaisAreAllVisible() = runComposeUiTest {
         val repo = InMemoryBonsaiRepository(
-            listOf(
-                Bonsai("1", "Akira", "Maple", LocalDate(2024, 3, 10)),
-                Bonsai("2", "Bonsuke", "Pine", LocalDate(2023, 7, 1)),
-            ),
+            listOf(bonsai("1", "Akira"), bonsai("2", "Bonsuke", LocalDate(2023, 7, 1))),
         )
         setContent { BonsaiListScreen(repository = repo, onNavigateToAdd = {}) }
         onNodeWithText("Akira").assertExists()

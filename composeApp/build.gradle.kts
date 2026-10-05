@@ -89,9 +89,15 @@ kover {
                     "mylittlebonsai.composeapp.generated.resources.*",
                     "*ComposableSingletons*",
                     "*\$WhenMappings",
-                    // androidMain classes require on-device tests; excluded from JVM coverage
+                    // androidMain classes require on-device tests; excluded from JVM coverage.
+                    // `excludedSourceSets` above does not stop the AGP KMP library plugin from
+                    // still handing these compiled classes to the JVM Kover report, so each one
+                    // needs an explicit filter too.
                     "*AndroidFolderStorageManager*",
                     "*.foldersetup.FolderPickerSupportKt\$rememberFolderPickerLauncher\$*",
+                    "*SafVaultFileSystem*",
+                    "*.data.vault.Slug_androidKt",
+                    "*.data.BonsaiRepositoryProvider_androidKt",
                 )
                 annotatedBy("androidx.compose.ui.tooling.preview.Preview")
             }

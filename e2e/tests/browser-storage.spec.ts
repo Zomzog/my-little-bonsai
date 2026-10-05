@@ -63,9 +63,7 @@ test.describe('Browser storage', () => {
           {
             id: 'id-a',
             name: 'Akira',
-            kind: 'Maple',
-            purchaseDate: '2024-03-10',
-            lastMaintenanceDate: null,
+            addedOn: '2024-03-10',
           },
         ]),
       },
@@ -76,7 +74,7 @@ test.describe('Browser storage', () => {
     await enterApp(page);
 
     await expect(page.getByText('Akira')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('Maple')).toBeVisible();
+    await expect(page.getByText('2024-03-10')).toBeVisible();
   });
 
   test('a reload does not send the user back to onboarding', async ({
