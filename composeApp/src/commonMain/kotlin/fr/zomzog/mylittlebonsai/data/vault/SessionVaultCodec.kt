@@ -58,10 +58,10 @@ object SessionVaultCodec {
                     appendLine("    substrate:")
                     appendSubstrateBody(it, indent = "      ")
                 }
-                action.pot?.let { appendLine("    pot: $it") }
+                action.pot?.let { appendLine("    pot: ${yamlScalar(it)}") }
             }
             is Action.Fertilizing -> {
-                appendLine("    fertilizer: ${action.fertilizer}")
+                appendLine("    fertilizer: ${yamlScalar(action.fertilizer)}")
                 action.dose?.let { dose ->
                     appendLine("    dose:")
                     appendLine("      amount: ${yamlNumber(dose.amount)}")
@@ -69,7 +69,7 @@ object SessionVaultCodec {
                 }
             }
             is Action.Treatment -> {
-                appendLine("    treatment: ${action.treatment}")
+                appendLine("    treatment: ${yamlScalar(action.treatment)}")
                 action.target?.let { appendLine("    target: ${yamlScalar(it)}") }
             }
             is Action.Other -> Unit

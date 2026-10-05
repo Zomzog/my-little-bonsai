@@ -16,15 +16,15 @@ object BonsaiVaultCodec {
         val yaml = buildString {
             appendLine("id: ${bonsai.id}")
             appendLine("name: ${yamlScalar(bonsai.name)}")
-            bonsai.species?.let { appendLine("species: $it") }
-            bonsai.style?.let { appendLine("style: $it") }
+            bonsai.species?.let { appendLine("species: ${yamlScalar(it)}") }
+            bonsai.style?.let { appendLine("style: ${yamlScalar(it)}") }
             appendLine("status: ${bonsai.status.name.lowercase()}")
             bonsai.archived?.let { appendArchived(it) }
             appendLine("addedOn: ${bonsai.addedOn}")
             bonsai.age?.let { appendAge(it) }
             bonsai.substrate?.let { appendSubstrate(it) }
-            bonsai.pot?.let { appendLine("pot: $it") }
-            bonsai.cover?.let { appendLine("cover: $it") }
+            bonsai.pot?.let { appendLine("pot: ${yamlScalar(it)}") }
+            bonsai.cover?.let { appendLine("cover: ${yamlScalar(it)}") }
         }
         return renderFrontMatter(yaml, bonsai.description)
     }
@@ -118,11 +118,11 @@ internal fun parseSubstrate(mapping: YamlNode.Mapping): Substrate {
 
 internal fun StringBuilder.appendSubstrateBody(substrate: Substrate, indent: String) {
     when (substrate) {
-        is Substrate.NamedMix -> appendLine("${indent}mix: ${substrate.mixId}")
+        is Substrate.NamedMix -> appendLine("${indent}mix: ${yamlScalar(substrate.mixId)}")
         is Substrate.InlineMix -> {
             appendLine("${indent}components:")
             for (component in substrate.components) {
-                appendLine("$indent  - soil: ${component.soil}")
+                appendLine("$indent  - soil: ${yamlScalar(component.soil)}")
                 appendLine("$indent    percent: ${component.percent}")
             }
         }

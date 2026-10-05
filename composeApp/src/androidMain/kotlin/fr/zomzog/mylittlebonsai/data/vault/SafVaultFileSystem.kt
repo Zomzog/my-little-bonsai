@@ -51,22 +51,52 @@ class SafVaultFileSystem(
 
         // A leftover temp file from an interrupted previous write would otherwise make
         // createDocument pick a different (suffixed) name instead of reusing this one.
-        val tmpName = ".$name.tmp"
+        // Keeping the real extension at the end (rather than appending ".tmp" after it)
+        // keeps the name's extension consistent with MIME_TYPE_MARKDOWN, since some
+        // providers (FileUtils.buildUniqueFile) append the MIME type's own extension
+        // whenever the given name's extension doesn't already map to it.
+        val tmpName = ".tmp-$name"
         deleteChildIfExists(parentId, tmpName)
         val tmpUri = DocumentsContract.createDocument(resolver, parentUri, MIME_TYPE_MARKDOWN, tmpName)
             ?: error("Could not create vault file: $path")
-        resolver.openOutputStream(tmpUri)?.use { it.write(content.toByteArray(Charsets.UTF_8)) }
 
-        DocumentsContract.renameDocument(resolver, tmpUri, name)
+        val wrote = resolver.openOutputStream(tmpUri)?.use {
+            it.write(content.toByteArray(Charsets.UTF_8))
+            true
+        } ?: false
+        if (!wrote) {
+            deleteDocumentQuietly(tmpUri)
+            error("Could not write vault file: $path (no output stream)")
+        }
+
+        // DocumentsContract.renameDocument cannot overwrite an existing document of the
+        // target name — on at least some providers it returns null rather than replacing
+        // it — so remove any existing file at `name` first. The temp file above is fully
+        // written before this point, so there is only a brief window with neither name
+        // present, never a window with partial content under the real name.
+        deleteChildIfExists(parentId, name)
+        val renamedUri = DocumentsContract.renameDocument(resolver, tmpUri, name)
+        if (renamedUri == null) {
+            deleteDocumentQuietly(tmpUri)
+            error("Could not finish writing vault file: $path (rename failed)")
+        }
         documentIdCache.remove(path)
         Unit
+    }
+
+    private fun deleteDocumentQuietly(uri: Uri) {
+        runCatching { DocumentsContract.deleteDocument(resolver, uri) }
     }
 
     private fun listChildren(path: String, predicate: (String) -> Boolean): List<String> {
         val documentId = resolveDocumentId(path, create = false) ?: return emptyList()
         val names = mutableListOf<String>()
         queryChildren(documentId) { cursor ->
-            if (predicate(cursor.getString(2))) names += cursor.getString(1)
+            val childId = cursor.getString(0)
+            val childName = cursor.getString(1)
+            val mimeType = cursor.getString(2)
+            documentIdCache[if (path.isEmpty()) childName else "$path/$childName"] = childId
+            if (predicate(mimeType)) names += childName
         }
         return names
     }

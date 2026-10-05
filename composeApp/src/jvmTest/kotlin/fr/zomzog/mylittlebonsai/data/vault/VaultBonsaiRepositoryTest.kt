@@ -76,6 +76,21 @@ class VaultBonsaiRepositoryTest {
     }
 
     @Test
+    fun addBonsaiAvoidsASlugTakenByAFolderThatFailedToParse() = runTest {
+        val root = createTempDirectory()
+        val fileSystem = LocalVaultFileSystem(root)
+        fileSystem.writeTextAtomic("bonsais/akira/bonsai.md", "not front matter at all")
+
+        val repository = VaultBonsaiRepository(fileSystem)
+        repository.addBonsai(akira)
+
+        // "akira" is already occupied by the unparsable folder, so it must not be reused
+        // (and overwritten) just because that folder never made it into slugsById.
+        assertThat(fileSystem.listDirectories("bonsais").sorted()).containsExactly("akira", "akira-2")
+        assertThat(fileSystem.readText("bonsais/akira/bonsai.md")).isEqualTo("not front matter at all")
+    }
+
+    @Test
     fun getBonsaiReturnsNullForAnUnknownId() = runTest {
         assertThat(newRepository().getBonsai("missing")).isNull()
     }

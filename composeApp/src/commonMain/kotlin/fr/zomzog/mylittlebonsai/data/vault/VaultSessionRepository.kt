@@ -44,7 +44,7 @@ class VaultSessionRepository(
         val fileName = sessionFileName(session.createdAt, fileSystem.listFiles(sessionsDir).toSet())
         fileSystem.writeTextAtomic("$sessionsDir/$fileName", SessionVaultCodec.encode(session))
         stateFlow.update { (it + session).sortedWith(sessionOrder.reversed()) }
-        syncLatestRepottingToBonsai(bonsaiId, stateFlow.value)
+        syncIfLatestRepotting(bonsaiId, session, stateFlow.value)
     }
 
     private suspend fun ensureLoaded(bonsaiId: String): MutableStateFlow<List<Session>> {
@@ -66,14 +66,23 @@ class VaultSessionRepository(
         }
     }
 
-    /** Copies [bonsaiId]'s newest repotting session's substrate/pot (if any) onto `bonsai.md`. */
-    private suspend fun syncLatestRepottingToBonsai(bonsaiId: String, allSessions: List<Session>) {
+    /**
+     * Copies [session]'s substrate/pot onto `bonsai.md`, but only when [session] is itself a
+     * repotting session and is the chronologically-latest one — a session with no repotting
+     * action (or an older repotting session loaded alongside a newer one) must not trigger a
+     * rewrite. Rereads `bonsai.md` from disk via [VaultBonsaiRepository.refreshBonsai] right
+     * before the rewrite rather than trusting this repository's in-memory snapshot, so a sync
+     * never clobbers a hand-edit (or another write) made to the file since it was last loaded.
+     */
+    private suspend fun syncIfLatestRepotting(bonsaiId: String, session: Session, allSessions: List<Session>) {
+        if (session.actions.none { it is Action.Repotting }) return
         val latestRepotting = allSessions
-            .filter { session -> session.actions.any { it is Action.Repotting } }
+            .filter { s -> s.actions.any { it is Action.Repotting } }
             .maxWithOrNull(sessionOrder)
             ?: return
+        if (latestRepotting.id != session.id) return
         val repottingAction = latestRepotting.actions.filterIsInstance<Action.Repotting>().last()
-        val bonsai = bonsaiRepository.getBonsai(bonsaiId) ?: return
+        val bonsai = bonsaiRepository.refreshBonsai(bonsaiId) ?: return
         bonsaiRepository.updateBonsai(
             bonsai.copy(
                 substrate = repottingAction.substrate ?: bonsai.substrate,

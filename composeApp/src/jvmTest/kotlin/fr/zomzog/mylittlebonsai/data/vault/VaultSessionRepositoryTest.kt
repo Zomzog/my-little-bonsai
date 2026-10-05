@@ -160,6 +160,32 @@ class VaultSessionRepositoryTest {
     }
 
     @Test
+    fun repottingSyncRereadsBonsaiMdInsteadOfOverwritingAHandEditWithAStaleCache() = runTest {
+        val fileSystem = LocalVaultFileSystem(createTempDirectory())
+        val bonsaiRepository = VaultBonsaiRepository(fileSystem)
+        val sessionRepository = VaultSessionRepository(fileSystem, bonsaiRepository)
+        bonsaiRepository.addBonsai(akira)
+
+        // A hand edit made directly on disk, bypassing bonsaiRepository's in-memory
+        // cache — e.g. edited in Obsidian while the app was open.
+        val handEdited = akira.copy(description = "Edited by hand")
+        fileSystem.writeTextAtomic("bonsais/akira/bonsai.md", BonsaiVaultCodec.encode(handEdited))
+
+        val repotting = session(
+            "s1",
+            LocalDate(2026, 4, 12),
+            VaultTimestamp(LocalDateTime(2026, 4, 12, 10, 0, 0), 0),
+            actions = listOf(Action.Repotting(substrate = Substrate.NamedMix("mix-1"), pot = "pot-1")),
+        )
+        sessionRepository.addSession("id-a", repotting)
+
+        val onDisk = BonsaiVaultCodec.decode(fileSystem.readText("bonsais/akira/bonsai.md"))
+        assertThat(onDisk.description).isEqualTo("Edited by hand")
+        assertThat(onDisk.substrate).isEqualTo(Substrate.NamedMix("mix-1"))
+        assertThat(onDisk.pot).isEqualTo("pot-1")
+    }
+
+    @Test
     fun nonRepottingSessionsDoNotTouchTheBonsai() = runTest {
         val (bonsaiRepository, sessionRepository) = repositories()
         bonsaiRepository.addBonsai(akira)

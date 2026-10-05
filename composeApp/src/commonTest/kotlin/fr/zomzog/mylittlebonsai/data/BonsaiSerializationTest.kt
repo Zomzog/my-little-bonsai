@@ -112,6 +112,12 @@ class BonsaiSerializationTest {
     }
 
     @Test
+    fun decodeFallsBackToTheLegacyPreAddedOnShape() {
+        val raw = """[{"id":"id-a","name":"Akira","kind":"juniper","purchaseDate":"2024-03-10"}]"""
+        assertThat(BonsaiSerialization.decode(raw)).containsExactly(bonsai)
+    }
+
+    @Test
     fun decodedMinimalBonsaiHasNullAge() {
         val decoded = BonsaiSerialization.decode(BonsaiSerialization.encode(listOf(bonsai)))
         assertThat(decoded.first().age).isNull()

@@ -115,7 +115,7 @@ private class MiniYamlParser(private val lines: List<YamlLine>) {
 
     private fun unquote(value: String): String = when {
         value.length >= 2 && value.first() == '"' && value.last() == '"' ->
-            value.substring(1, value.length - 1).replace("\\\"", "\"").replace("\\\\", "\\")
+            unescapeYamlDoubleQuoted(value.substring(1, value.length - 1))
         value.length >= 2 && value.first() == '\'' && value.last() == '\'' ->
             value.substring(1, value.length - 1).replace("''", "'")
         else -> value

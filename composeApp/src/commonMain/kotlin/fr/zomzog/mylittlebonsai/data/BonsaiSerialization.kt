@@ -23,6 +23,25 @@ import kotlinx.serialization.json.Json
 @Serializable
 internal data class SubstrateComponentDto(val soil: String, val percent: Int)
 
+/**
+ * The pre-`addedOn` web localStorage shape. Kept only so [BonsaiSerialization.decode] can
+ * fall back to it: [BonsaiDto] now requires `addedOn`, which an entry stored before that
+ * field existed doesn't have, and decoding it as [BonsaiDto] directly would otherwise wipe
+ * a user's existing data on the next write.
+ */
+@Serializable
+private data class LegacyBonsaiDto(
+    val id: String,
+    val name: String,
+    val purchaseDate: String,
+)
+
+private fun LegacyBonsaiDto.toDomain(): Bonsai = Bonsai(
+    id = id,
+    name = name,
+    addedOn = LocalDate.parse(purchaseDate),
+)
+
 @Serializable
 internal data class BonsaiDto(
     val id: String,
@@ -47,6 +66,7 @@ internal object BonsaiSerialization {
 
     private val json = Json { ignoreUnknownKeys = true }
     private val serializer = ListSerializer(BonsaiDto.serializer())
+    private val legacySerializer = ListSerializer(LegacyBonsaiDto.serializer())
 
     fun encode(bonsais: List<Bonsai>): String =
         json.encodeToString(serializer, bonsais.map { it.toDto() })
@@ -54,10 +74,13 @@ internal object BonsaiSerialization {
     /**
      * Decodes a previously encoded payload, returning an empty list when the stored
      * value is missing, truncated or otherwise unreadable — a corrupt entry must not
-     * prevent the app from starting.
+     * prevent the app from starting. Falls back to the pre-`addedOn` legacy shape so
+     * data stored before that field existed isn't silently discarded.
      */
     fun decode(raw: String): List<Bonsai> = runCatching {
         json.decodeFromString(serializer, raw).map { it.toDomain() }
+    }.recoverCatching {
+        json.decodeFromString(legacySerializer, raw).map { it.toDomain() }
     }.getOrElse { emptyList() }
 }
 

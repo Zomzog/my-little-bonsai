@@ -72,8 +72,12 @@ and attachments (picture embeds) to follow-up issues.
   `VaultSessionRepository` are implemented and tested but not wired into a screen),
   and `metadata.yaml` `schemaVersion` validation/migration.
 - `SafVaultFileSystem` and the Android provider wiring are excluded from the JVM
-  Kover run (the existing `excludedSourceSets.add("androidMain")` already covers
-  them, matching `AndroidFolderStorageManager`'s precedent) since they need
-  on-device SAF behaviour that JVM tests cannot reach; `VaultBonsaiRepository`/
-  `VaultSessionRepository`/the codec/`slugify` are fully covered via `commonTest`/
-  `jvmTest` against `LocalVaultFileSystem` instead.
+  Kover run since they need on-device SAF behaviour that JVM tests cannot reach,
+  matching `AndroidFolderStorageManager`'s precedent. `excludedSourceSets.add(
+  "androidMain")` alone does not stop the AGP KMP library plugin from still
+  handing these compiled classes to the JVM Kover report, so each one (
+  `SafVaultFileSystem`, `Slug_androidKt`, `BonsaiRepositoryProvider_androidKt`)
+  also needs an explicit `reports.filters.excludes.classes(...)` entry — see
+  `composeApp/build.gradle.kts`. `VaultBonsaiRepository`/`VaultSessionRepository`/
+  the codec/`slugify` are fully covered via `commonTest`/`jvmTest` against
+  `LocalVaultFileSystem` instead.
