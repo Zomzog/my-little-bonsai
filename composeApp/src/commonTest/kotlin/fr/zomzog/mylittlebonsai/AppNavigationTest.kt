@@ -9,9 +9,8 @@ import androidx.compose.ui.test.runComposeUiTest
 import fr.zomzog.mylittlebonsai.data.InMemoryBonsaiRepository
 import fr.zomzog.mylittlebonsai.ui.addbonsai.ADD_BONSAI_TITLE
 import fr.zomzog.mylittlebonsai.ui.addbonsai.BUTTON_ADD
-import fr.zomzog.mylittlebonsai.ui.addbonsai.LABEL_KIND
+import fr.zomzog.mylittlebonsai.ui.addbonsai.LABEL_ADDED_ON
 import fr.zomzog.mylittlebonsai.ui.addbonsai.LABEL_NAME
-import fr.zomzog.mylittlebonsai.ui.addbonsai.LABEL_PURCHASE_DATE
 import fr.zomzog.mylittlebonsai.ui.bonsailist.ADD_BONSAI_BUTTON_DESCRIPTION
 import fr.zomzog.mylittlebonsai.ui.bonsailist.BONSAI_LIST_TITLE
 import fr.zomzog.mylittlebonsai.ui.foldersetup.FOLDER_SETUP_BUTTON
@@ -75,8 +74,7 @@ class AppNavigationTest {
         waitForIdle()
         onNodeWithContentDescription(ADD_BONSAI_BUTTON_DESCRIPTION).performClick()
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
-        onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText(LABEL_ADDED_ON).performClick()
         onNodeWithText("OK").performClick()
         onNodeWithText(BUTTON_ADD).performClick()
         waitForIdle()
@@ -92,8 +90,7 @@ class AppNavigationTest {
         waitForIdle()
         onNodeWithContentDescription(ADD_BONSAI_BUTTON_DESCRIPTION).performClick()
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
-        onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText(LABEL_ADDED_ON).performClick()
         onNodeWithText("OK").performClick()
         onNodeWithText(BUTTON_ADD).performClick()
         waitForIdle()

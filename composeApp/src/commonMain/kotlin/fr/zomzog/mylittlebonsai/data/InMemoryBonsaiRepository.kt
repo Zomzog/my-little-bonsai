@@ -17,4 +17,10 @@ class InMemoryBonsaiRepository(
     override suspend fun addBonsai(bonsai: Bonsai) {
         _bonsais.update { it + bonsai }
     }
+
+    override suspend fun getBonsai(id: String): Bonsai? = _bonsais.value.find { it.id == id }
+
+    override suspend fun updateBonsai(bonsai: Bonsai) {
+        _bonsais.update { list -> list.map { if (it.id == bonsai.id) bonsai else it } }
+    }
 }

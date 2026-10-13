@@ -58,13 +58,21 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
+        // Shared between jvm and android only (not wasmJs), for `java.text.Normalizer`-based
+        // code — identical actuals in both platform source sets otherwise.
+        val jvmAndAndroidMain by creating {
+            dependsOn(commonMain.get())
+        }
+
         val androidMain by getting {
+            dependsOn(jvmAndAndroidMain)
             dependencies {
                 implementation(libs.androidx.activity.compose)
             }
         }
 
         val jvmMain by getting {
+            dependsOn(jvmAndAndroidMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
             }
@@ -89,9 +97,20 @@ kover {
                     "mylittlebonsai.composeapp.generated.resources.*",
                     "*ComposableSingletons*",
                     "*\$WhenMappings",
-                    // androidMain classes require on-device tests; excluded from JVM coverage
+                    // androidMain classes require on-device tests; excluded from JVM coverage.
+                    // `excludedSourceSets` above does not stop the AGP KMP library plugin from
+                    // still handing these compiled classes to the JVM Kover report, so each one
+                    // needs an explicit filter too.
                     "*AndroidFolderStorageManager*",
                     "*.foldersetup.FolderPickerSupportKt\$rememberFolderPickerLauncher\$*",
+                    // SafVaultFileSystem.kt itself is now just a thin ContentResolver/
+                    // DocumentsContract adapter (AndroidDocumentTree) behind the DocumentTree
+                    // interface; the document-id resolution, tmp-then-rename write and
+                    // caching logic moved to commonMain's DocumentTreeVaultFileSystem, which
+                    // is covered via commonTest against a fake and needs no exclusion.
+                    "*SafVaultFileSystem*",
+                    "*AndroidDocumentTree*",
+                    "*.data.BonsaiRepositoryProvider_androidKt",
                 )
                 annotatedBy("androidx.compose.ui.tooling.preview.Preview")
             }

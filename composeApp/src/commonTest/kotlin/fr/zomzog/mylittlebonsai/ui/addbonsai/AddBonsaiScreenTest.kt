@@ -16,9 +16,7 @@ class AddBonsaiScreenTest {
     fun screenRendersAllFields() = runComposeUiTest {
         setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
         onNodeWithText(LABEL_NAME).assertExists()
-        onNodeWithText(LABEL_KIND).assertExists()
-        onNodeWithText(LABEL_PURCHASE_DATE).assertExists()
-        onNodeWithText(LABEL_LAST_MAINTENANCE).assertExists()
+        onNodeWithText(LABEL_ADDED_ON).assertExists()
         onNodeWithText(BUTTON_ADD).assertExists()
     }
 
@@ -30,20 +28,11 @@ class AddBonsaiScreenTest {
     }
 
     @Test
-    fun clickingAddWithBlankKindShowsKindError() = runComposeUiTest {
+    fun clickingAddWithoutAddedOnShowsDateError() = runComposeUiTest {
         setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
         onNodeWithText(BUTTON_ADD).performClick()
-        onNodeWithText(ERROR_KIND_BLANK).assertExists()
-    }
-
-    @Test
-    fun clickingAddWithoutPurchaseDateShowsDateError() = runComposeUiTest {
-        setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
-        onNodeWithText(LABEL_NAME).performTextInput("Akira")
-        onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(BUTTON_ADD).performClick()
-        onNodeWithText(ERROR_PURCHASE_DATE_REQUIRED).assertExists()
+        onNodeWithText(ERROR_ADDED_ON_REQUIRED).assertExists()
     }
 
     @Test
@@ -56,8 +45,7 @@ class AddBonsaiScreenTest {
             )
         }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
-        onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText(LABEL_ADDED_ON).performClick()
         onNodeWithText("OK").performClick()
         onNodeWithText(BUTTON_ADD).performClick()
         waitForIdle()
@@ -65,42 +53,21 @@ class AddBonsaiScreenTest {
     }
 
     @Test
-    fun cancellingDatePickerKeepsNoPurchaseDate() = runComposeUiTest {
+    fun cancellingDatePickerKeepsNoAddedOn() = runComposeUiTest {
         setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
-        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText(LABEL_ADDED_ON).performClick()
         onNodeWithText("Cancel").performClick()
-        onNodeWithText(LABEL_PURCHASE_DATE).assertExists()
+        onNodeWithText(LABEL_ADDED_ON).assertExists()
     }
 
     @Test
-    fun purchaseDateErrorClearsAfterPickingDate() = runComposeUiTest {
+    fun addedOnErrorClearsAfterPickingDate() = runComposeUiTest {
         setContent { AddBonsaiScreen(repository = InMemoryBonsaiRepository(), onBonsaiAdded = {}) }
         onNodeWithText(LABEL_NAME).performTextInput("Akira")
-        onNodeWithText(LABEL_KIND).performTextInput("Maple")
         onNodeWithText(BUTTON_ADD).performClick()
-        onNodeWithText(ERROR_PURCHASE_DATE_REQUIRED).assertExists()
-        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
+        onNodeWithText(ERROR_ADDED_ON_REQUIRED).assertExists()
+        onNodeWithText(LABEL_ADDED_ON).performClick()
         onNodeWithText("OK").performClick()
-        onNodeWithText(ERROR_PURCHASE_DATE_REQUIRED).assertDoesNotExist()
-    }
-
-    @Test
-    fun validFormWithMaintenanceDateCallsOnBonsaiAdded() = runComposeUiTest {
-        var added = false
-        setContent {
-            AddBonsaiScreen(
-                repository = InMemoryBonsaiRepository(),
-                onBonsaiAdded = { added = true },
-            )
-        }
-        onNodeWithText(LABEL_NAME).performTextInput("Akira")
-        onNodeWithText(LABEL_KIND).performTextInput("Maple")
-        onNodeWithText(LABEL_PURCHASE_DATE).performClick()
-        onNodeWithText("OK").performClick()
-        onNodeWithText(LABEL_LAST_MAINTENANCE).performClick()
-        onNodeWithText("OK").performClick()
-        onNodeWithText(BUTTON_ADD).performClick()
-        waitForIdle()
-        assertTrue(added)
+        onNodeWithText(ERROR_ADDED_ON_REQUIRED).assertDoesNotExist()
     }
 }
