@@ -14,20 +14,20 @@ class DocumentTreeVaultFileSystem(private val tree: DocumentTree) : VaultFileSys
 
     private val documentIdCache = mutableMapOf<String, String>()
 
-    override suspend fun listDirectories(path: String): List<String> = withContext(Dispatchers.IO) {
+    override suspend fun listDirectories(path: String): List<String> = withContext(Dispatchers.Default) {
         listChildren(path) { mimeType -> mimeType == DOCUMENT_MIME_TYPE_DIR }
     }
 
-    override suspend fun listFiles(path: String): List<String> = withContext(Dispatchers.IO) {
+    override suspend fun listFiles(path: String): List<String> = withContext(Dispatchers.Default) {
         listChildren(path) { mimeType -> mimeType != DOCUMENT_MIME_TYPE_DIR }
     }
 
-    override suspend fun readText(path: String): String = withContext(Dispatchers.IO) {
+    override suspend fun readText(path: String): String = withContext(Dispatchers.Default) {
         val documentId = resolveDocumentId(path, create = false) ?: error("Vault file not found: $path")
-        tree.readBytes(documentId)?.toString(Charsets.UTF_8) ?: error("Could not open vault file: $path")
+        tree.readBytes(documentId)?.decodeToString() ?: error("Could not open vault file: $path")
     }
 
-    override suspend fun writeTextAtomic(path: String, content: String) = withContext(Dispatchers.IO) {
+    override suspend fun writeTextAtomic(path: String, content: String) = withContext(Dispatchers.Default) {
         val parentPath = path.substringBeforeLast('/', "")
         val name = path.substringAfterLast('/')
         val parentId = resolveDocumentId(parentPath, create = true)
@@ -44,7 +44,7 @@ class DocumentTreeVaultFileSystem(private val tree: DocumentTree) : VaultFileSys
         val tmpId = tree.createDocument(parentId, MIME_TYPE_MARKDOWN, tmpName)
             ?: error("Could not create vault file: $path")
 
-        val wrote = tree.writeBytes(tmpId, content.toByteArray(Charsets.UTF_8))
+        val wrote = tree.writeBytes(tmpId, content.encodeToByteArray())
         if (!wrote) {
             deleteDocumentQuietly(tmpId)
             error("Could not write vault file: $path (no output stream)")
