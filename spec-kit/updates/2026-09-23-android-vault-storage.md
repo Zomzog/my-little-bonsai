@@ -43,16 +43,25 @@ and attachments (picture embeds) to follow-up issues.
   (Unicode fold via a per-platform `stripDiacritics`, ligature table, collision
   suffixing).
 - **Storage abstraction**: `VaultFileSystem` (list/read/write-atomic by
-  vault-relative path) is implemented by `SafVaultFileSystem` (Android, raw
-  `ContentResolver`/`DocumentsContract` batched queries — not
-  `androidx.documentfile`, whose per-child `DocumentFile` metadata queries are too
-  slow for the "~200 bonsais / 5000 sessions" scale the issue calls out) and by
-  `LocalVaultFileSystem` (JVM, `java.nio.file`; used to exercise the repository logic
-  against a real filesystem in `jvmTest`, since there is no `androidTest` source set
-  yet). `VaultBonsaiRepository`/`VaultSessionRepository` build an in-memory index on
-  first use and implement the two repository interfaces over `VaultFileSystem`.
-  `AndroidFolderStorageManager` gained `folderUri()` so the Android
+  vault-relative path) is implemented by `LocalVaultFileSystem` (JVM, `java.nio.file`;
+  used to exercise the repository logic against a real filesystem in `jvmTest`, since
+  there is no `androidTest` source set yet) and by `DocumentTreeVaultFileSystem`
+  (`commonMain`), which implements the document-id caching, tmp-then-rename write and
+  overwrite/null-stream handling against a small `DocumentTree` interface rather than
+  directly against `ContentResolver`/`DocumentsContract`. On Android, `SafVaultFileSystem`
+  wires `DocumentTreeVaultFileSystem` to a private `AndroidDocumentTree` adapter (raw
+  batched `ContentResolver.query`, not `androidx.documentfile`, whose per-child
+  `DocumentFile` metadata queries are too slow for the "~200 bonsais / 5000 sessions"
+  scale the issue calls out). Splitting out `DocumentTree` means the actual logic is
+  exercised in `commonTest` against a `FakeDocumentTree`, rather than only being
+  reachable on-device. `VaultBonsaiRepository`/`VaultSessionRepository` build an
+  in-memory index on first use and implement the two repository interfaces over
+  `VaultFileSystem`. `AndroidFolderStorageManager` gained `folderUri()` so the Android
   `BonsaiRepositoryProvider` can hand the persisted vault root to `SafVaultFileSystem`.
+- **Source sets**: `stripDiacritics` (used by `slugify`) had identical `actual`
+  implementations in `androidMain` and `jvmMain` (both just `java.text.Normalizer`).
+  Moved to a new `jvmAndAndroidMain` intermediate source set that both depend on,
+  removing the duplicate.
 - **UI**: `AddBonsaiScreen` now collects `name` and `addedOn` (renamed from
   `purchaseDate`) only; the placeholder `Kind` and `Last maintenance` fields are
   gone, since neither has a vault-format equivalent. `BonsaiListScreen` shows
@@ -71,13 +80,18 @@ and attachments (picture embeds) to follow-up issues.
   place; it does not yet move the folder), any session-log UI (`SessionRepository`/
   `VaultSessionRepository` are implemented and tested but not wired into a screen),
   and `metadata.yaml` `schemaVersion` validation/migration.
-- `SafVaultFileSystem` and the Android provider wiring are excluded from the JVM
-  Kover run since they need on-device SAF behaviour that JVM tests cannot reach,
-  matching `AndroidFolderStorageManager`'s precedent. `excludedSourceSets.add(
-  "androidMain")` alone does not stop the AGP KMP library plugin from still
-  handing these compiled classes to the JVM Kover report, so each one (
-  `SafVaultFileSystem`, `Slug_androidKt`, `BonsaiRepositoryProvider_androidKt`)
+- `SafVaultFileSystem`'s `AndroidDocumentTree` adapter and the Android provider wiring
+  are excluded from the JVM Kover run since they need on-device SAF behaviour that JVM
+  tests cannot reach, matching `AndroidFolderStorageManager`'s precedent.
+  `excludedSourceSets.add("androidMain")` alone does not stop the AGP KMP library
+  plugin from still handing these compiled classes to the JVM Kover report, so each one
+  (`SafVaultFileSystem`/`AndroidDocumentTree`, `BonsaiRepositoryProvider_androidKt`)
   also needs an explicit `reports.filters.excludes.classes(...)` entry — see
   `composeApp/build.gradle.kts`. `VaultBonsaiRepository`/`VaultSessionRepository`/
-  the codec/`slugify` are fully covered via `commonTest`/`jvmTest` against
-  `LocalVaultFileSystem` instead.
+  the codec/`slugify`/`DocumentTreeVaultFileSystem` are fully covered via
+  `commonTest`/`jvmTest` against `LocalVaultFileSystem`/`FakeDocumentTree` instead —
+  including `DocumentTreeVaultFileSystem`, now that the SAF write/rename/caching logic
+  lives there rather than in `SafVaultFileSystem` itself. The `jvmAndAndroidMain`
+  `stripDiacritics` no longer needs its own exclusion either: it has a real JVM-compiled
+  counterpart that `commonTest`'s `jvmTest` run exercises directly, unlike code that only
+  ever existed in `androidMain`.
