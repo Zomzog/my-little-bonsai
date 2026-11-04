@@ -35,7 +35,6 @@ fun App(
     repository: BonsaiRepository? = null,
     folderStorageManager: FolderStorageManager? = null,
 ) {
-    val effectiveRepository = rememberBonsaiRepository(repository)
     val effectiveStorageManager = rememberFolderStorageManager(folderStorageManager)
     val colors = if (useDarkTheme) darkColorScheme() else lightColorScheme()
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
@@ -59,14 +58,23 @@ fun App(
                     storageManager = effectiveStorageManager,
                     onFolderGranted = { currentScreen = Screen.BonsaiList },
                 )
-                Screen.BonsaiList -> BonsaiListScreen(
-                    repository = effectiveRepository,
-                    onNavigateToAdd = { currentScreen = Screen.AddBonsai },
-                )
-                Screen.AddBonsai -> AddBonsaiScreen(
-                    repository = effectiveRepository,
-                    onBonsaiAdded = { currentScreen = Screen.BonsaiList },
-                )
+                // Grouped so rememberBonsaiRepository is only ever composed once storage access
+                // is confirmed (never at Screen.Home), and is shared while navigating between
+                // these two screens rather than reloading the vault on every visit.
+                Screen.BonsaiList, Screen.AddBonsai -> {
+                    val effectiveRepository = rememberBonsaiRepository(repository)
+                    when (currentScreen) {
+                        Screen.BonsaiList -> BonsaiListScreen(
+                            repository = effectiveRepository,
+                            onNavigateToAdd = { currentScreen = Screen.AddBonsai },
+                        )
+                        Screen.AddBonsai -> AddBonsaiScreen(
+                            repository = effectiveRepository,
+                            onBonsaiAdded = { currentScreen = Screen.BonsaiList },
+                        )
+                        else -> Unit
+                    }
+                }
             }
         }
     }

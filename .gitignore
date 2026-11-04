@@ -40,3 +40,6 @@ composeApp/src/*/generatedResources/
 # Secrets
 *.env
 *.env.*
+
+# Agent runtime state (not project content)
+.agents/scheduled_tasks.lock

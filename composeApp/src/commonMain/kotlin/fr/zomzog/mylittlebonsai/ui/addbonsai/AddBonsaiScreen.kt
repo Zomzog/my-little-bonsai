@@ -33,22 +33,16 @@ import kotlin.uuid.Uuid
 
 const val ADD_BONSAI_TITLE = "Add Bonsai"
 const val LABEL_NAME = "Name"
-const val LABEL_KIND = "Kind"
-const val LABEL_PURCHASE_DATE = "Purchase date"
-const val LABEL_LAST_MAINTENANCE = "Last maintenance (optional)"
+const val LABEL_ADDED_ON = "Added on"
 const val BUTTON_ADD = "Add"
 const val ERROR_NAME_BLANK = "Name is required"
-const val ERROR_KIND_BLANK = "Kind is required"
-const val ERROR_PURCHASE_DATE_REQUIRED = "Purchase date is required"
+const val ERROR_ADDED_ON_REQUIRED = "Added on is required"
 
 data class AddBonsaiFormState(
     val name: String = "",
-    val kind: String = "",
-    val purchaseDate: LocalDate? = null,
-    val lastMaintenanceDate: LocalDate? = null,
+    val addedOn: LocalDate? = null,
     val nameError: String? = null,
-    val kindError: String? = null,
-    val purchaseDateError: String? = null,
+    val addedOnError: String? = null,
 )
 
 data class ValidationResult(
@@ -58,22 +52,15 @@ data class ValidationResult(
 
 fun validate(state: AddBonsaiFormState): ValidationResult {
     val nameError = if (state.name.isBlank()) ERROR_NAME_BLANK else null
-    val kindError = if (state.kind.isBlank()) ERROR_KIND_BLANK else null
-    val purchaseDateError = if (state.purchaseDate == null) ERROR_PURCHASE_DATE_REQUIRED else null
+    val addedOnError = if (state.addedOn == null) ERROR_ADDED_ON_REQUIRED else null
 
-    val updated = state.copy(
-        nameError = nameError,
-        kindError = kindError,
-        purchaseDateError = purchaseDateError,
-    )
+    val updated = state.copy(nameError = nameError, addedOnError = addedOnError)
 
-    val bonsai = if (nameError == null && kindError == null && purchaseDateError == null) {
+    val bonsai = if (nameError == null && addedOnError == null) {
         Bonsai(
             id = Uuid.random().toString(),
             name = state.name,
-            kind = state.kind,
-            purchaseDate = state.purchaseDate!!,
-            lastMaintenanceDate = state.lastMaintenanceDate,
+            addedOn = state.addedOn!!,
         )
     } else {
         null
@@ -91,8 +78,7 @@ fun AddBonsaiScreen(
 ) {
     var formState by remember { mutableStateOf(AddBonsaiFormState()) }
     val coroutineScope = rememberCoroutineScope()
-    var showPurchaseDatePicker by remember { mutableStateOf(false) }
-    var showMaintenanceDatePicker by remember { mutableStateOf(false) }
+    var showAddedOnDatePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -112,39 +98,21 @@ fun AddBonsaiScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = formState.kind,
-                onValueChange = { formState = formState.copy(kind = it, kindError = null) },
-                label = { Text(LABEL_KIND) },
-                isError = formState.kindError != null,
-                supportingText = formState.kindError?.let { error -> { Text(error) } },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(8.dp))
             OutlinedButton(
-                onClick = { showPurchaseDatePicker = true },
+                onClick = { showAddedOnDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(formState.purchaseDate?.toString() ?: LABEL_PURCHASE_DATE)
+                Text(formState.addedOn?.toString() ?: LABEL_ADDED_ON)
             }
-            if (formState.purchaseDateError != null) {
+            if (formState.addedOnError != null) {
                 Text(
-                    text = formState.purchaseDateError!!,
+                    text = formState.addedOnError!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            OutlinedButton(
-                onClick = { showMaintenanceDatePicker = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(formState.lastMaintenanceDate?.toString() ?: LABEL_LAST_MAINTENANCE)
-            }
             Spacer(Modifier.height(16.dp))
-            if (formState.nameError != null || formState.kindError != null ||
-                formState.purchaseDateError != null
-            ) {
+            if (formState.nameError != null || formState.addedOnError != null) {
                 Text(
                     text = "Please fix the errors above",
                     color = MaterialTheme.colorScheme.error,
@@ -171,25 +139,14 @@ fun AddBonsaiScreen(
         }
     }
 
-    if (showPurchaseDatePicker) {
+    if (showAddedOnDatePicker) {
         BonsaiDatePickerDialog(
-            initialDate = formState.purchaseDate,
+            initialDate = formState.addedOn,
             onDateSelected = { date ->
-                formState = formState.copy(purchaseDate = date, purchaseDateError = null)
-                showPurchaseDatePicker = false
+                formState = formState.copy(addedOn = date, addedOnError = null)
+                showAddedOnDatePicker = false
             },
-            onDismiss = { showPurchaseDatePicker = false },
-        )
-    }
-
-    if (showMaintenanceDatePicker) {
-        BonsaiDatePickerDialog(
-            initialDate = formState.lastMaintenanceDate,
-            onDateSelected = { date ->
-                formState = formState.copy(lastMaintenanceDate = date)
-                showMaintenanceDatePicker = false
-            },
-            onDismiss = { showMaintenanceDatePicker = false },
+            onDismiss = { showAddedOnDatePicker = false },
         )
     }
 }

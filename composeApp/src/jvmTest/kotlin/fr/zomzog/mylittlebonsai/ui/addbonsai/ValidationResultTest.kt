@@ -9,15 +9,11 @@ import kotlin.test.Test
 
 class ValidationResultTest {
 
-    private fun validState() = AddBonsaiFormState(
-        name = "Akira",
-        kind = "Maple",
-        purchaseDate = LocalDate(2024, 3, 10),
-    )
+    private fun validState() = AddBonsaiFormState(name = "Akira", addedOn = LocalDate(2024, 3, 10))
 
     // validate() generates a random UUID for Bonsai.id, so equality tests use an
     // invalid state (bonsai = null) where UUID randomness is not a factor.
-    private fun invalidState() = AddBonsaiFormState(name = "", kind = "Maple", purchaseDate = LocalDate(2024, 3, 10))
+    private fun invalidState() = AddBonsaiFormState(name = "", addedOn = LocalDate(2024, 3, 10))
 
     @Test
     fun validationResultEqualityForSameInputs() {
@@ -29,7 +25,7 @@ class ValidationResultTest {
     @Test
     fun validationResultInequalityForDifferentInputs() {
         val r1 = validate(invalidState())
-        val r2 = validate(invalidState().copy(kind = "Pine"))
+        val r2 = validate(invalidState().copy(addedOn = LocalDate(2020, 1, 1)))
         assertThat(r1).isNotEqualTo(r2)
     }
 
